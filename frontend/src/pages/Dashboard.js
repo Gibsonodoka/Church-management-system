@@ -23,25 +23,29 @@ const Dashboard = () => {
               <h1 className="mt-4">Dashboard</h1>
               <p>Welcome to Our Church Management System</p>
 
-              {/* Dashboard Cards */}
+              {/* Dashboard Cards with Icons */}
               <div className="row">
-                {/* Cards */}
                 {[
-                  { title: "Church Members", color: "bg-primary" },
-                  { title: "Visitors", color: "bg-success" },
-                  { title: "Church Inventory", color: "bg-warning" },
-                  { title: "Departments", color: "bg-danger" },
-                  { title: "Finance", color: "bg-info" },
-                  { title: "Events", color: "bg-secondary" },
-                  { title: "Daughter Churches", color: "bg-dark" },
-                  { title: "Attendance System", color: "bg-light text-dark" },
+                  { title: "Church Members", color: "bg-primary text-white", icon: "fas fa-users" },
+                  { title: "Visitors", color: "bg-success text-white", icon: "fas fa-user-plus" },
+                  { title: "Church Inventory", color: "bg-warning text-white", icon: "fas fa-box" },
+                  { title: "Departments", color: "bg-danger text-white", icon: "fas fa-building" },
+                  { title: "Finance", color: "bg-info text-white", icon: "fas fa-wallet" },
+                  { title: "Events", color: "bg-secondary text-white", icon: "fas fa-calendar-alt" },
+                  { title: "Daughter Churches", color: "bg-dark text-white", icon: "fas fa-church" },
+                  { title: "Attendance System", color: "bg-light text-dark", icon: "fas fa-clipboard-list" }, // Fixed styling here
                 ].map((card, index) => (
                   <div key={index} className="col-xl-3 col-md-6">
-                    <div className={`card ${card.color} text-white mb-4`}>
-                      <div className="card-body">{card.title}</div>
+                    <div className={`card ${card.color} mb-4`}>
+                      <div className="card-body d-flex align-items-center justify-content-between">
+                        <div>{card.title}</div>
+                        <i className={`${card.icon} fa-2x`}></i> {/* Icon */}
+                      </div>
                       <div className="card-footer d-flex align-items-center justify-content-between">
-                        <a className="small text-white stretched-link" href="#">View Details</a>
-                        <div className="small text-white"><i className="fas fa-angle-right"></i></div>
+                        <a className={`small ${card.color.includes("bg-light") ? "text-dark" : "text-white"} stretched-link`} href="#">View Details</a>
+                        <div className={`small ${card.color.includes("bg-light") ? "text-dark" : "text-white"}`}>
+                          <i className="fas fa-angle-right"></i>
+                        </div>
                       </div>
                     </div>
                   </div>

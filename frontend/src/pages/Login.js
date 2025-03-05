@@ -13,22 +13,27 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
+    console.log("Login attempt:", { email, password });
+
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/login",
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
+      
+      console.log("Response Data:", response.data);
 
-      // ✅ Check if the response contains a token
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user)); // Store user details
-        navigate("/dashboard"); // Redirect to Dashboard
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        console.log("Login successful! Redirecting...");
+        navigate("/dashboard");
       } else {
         setError("Login failed. No token received.");
       }
     } catch (err) {
+      console.error("Login Error:", err.response?.data || err.message);
       setError("Invalid credentials. Please try again.");
     }
   };

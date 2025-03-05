@@ -3,27 +3,26 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for authentication and other 
-| API functionalities. These routes are loaded by the RouteServiceProvider
-| and are assigned the "api" middleware group.
-|
 */
 
 // Public routes (No authentication required)
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']); // Users can register themselves
 
 // Protected routes (Require authentication via Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
+    
+    // Get authenticated user details
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return response()->json($request->user());
     });
 
-    Route::post('/logout', [AuthController::class, 'logout']); // logout route
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout']);
 });

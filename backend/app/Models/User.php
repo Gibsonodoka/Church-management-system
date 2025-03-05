@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // Added role field
+        'team', // Added team field (only for team heads)
     ];
 
     /**
@@ -44,6 +46,55 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string',
+            'team' => 'string',
         ];
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole($role)
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if the user belongs to a specific team.
+     */
+    public function isInTeam($team)
+    {
+        return $this->team === $team;
+    }
+
+    /**
+     * Role-based access helper methods.
+     */
+    public function isSuperAdmin()
+    {
+        return $this->role === 'Super Admin';
+    }
+
+    public function isSeniorPastor()
+    {
+        return $this->role === 'Senior Pastor';
+    }
+
+    public function isPastor()
+    {
+        return $this->role === 'Pastor';
+    }
+
+    public function isTeamHead()
+    {
+        return in_array($this->role, ['Media', 'Ushering', 'Visitation', 'Music', 'Finance']);
+    }
+
+    /**
+     * Get the team name for team heads.
+     */
+    public function getTeamName()
+    {
+        return $this->isTeamHead() ? $this->team : null;
     }
 }

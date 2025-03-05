@@ -1,0 +1,184 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  Toolbar,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  CssBaseline,
+  Box,
+  CircularProgress,
+  Avatar,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+  useTheme,
+  createTheme,
+  ThemeProvider,
+  Grid,
+} from "@mui/material";
+import { Menu as MenuIcon, Brightness4, Brightness7, Logout } from "@mui/icons-material";
+import {
+  Sidebar,
+  StyledAppBar,
+  MainContent,
+  StyledCard,
+} from "../styles/dashboardStyles"; 
+
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import GroupsIcon from "@mui/icons-material/Groups";
+import EventIcon from "@mui/icons-material/Event";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import LocationCityIcon from "@mui/icons-material/LocationCity";
+import SettingsIcon from "@mui/icons-material/Settings";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import BookIcon from "@mui/icons-material/Book";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+
+// **Main Dashboard Sections (Grid Items)**
+const gridSections = [
+  { title: "Church Members", icon: <GroupsIcon />, path: "/members", color: "#FFD54F" },
+  { title: "Visitors", icon: <PeopleAltIcon />, path: "/visitors", color: "#4FC3F7" },
+  { title: "Church Inventory", icon: <InventoryIcon />, path: "/inventory", color: "#A5D6A7" },
+  { title: "Departments", icon: <DashboardIcon />, path: "/departments", color: "#BA68C8" },
+  { title: "Finance", icon: <AttachMoneyIcon />, path: "/finance", color: "#FF8A65" },
+  { title: "Events", icon: <EventIcon />, path: "/events", color: "#64B5F6" },
+  { title: "Daughter Churches", icon: <LocationCityIcon />, path: "/daughter-churches", color: "#A1887F" },
+  { title: "Attendance System", icon: <CheckCircleOutlineIcon />, path: "/attendance", color: "#81C784" },
+];
+
+// **Sidebar-Only Sections**
+const sidebarSections = [
+  { title: "Sermon Library", icon: <BookIcon />, path: "/sermons", color: "#9575CD" },
+  { title: "Generate Reports", icon: <BarChartIcon />, path: "/reports", color: "#FFB74D" },
+  { title: "System Settings", icon: <SettingsIcon />, path: "/settings", color: "#90A4AE" },
+];
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [darkMode, setDarkMode] = useState(localStorage.getItem("darkMode") === "true");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      try {
+        const response = await axios.get("http://127.0.0.1:8000/api/user", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(response.data);
+      } catch (err) {
+        console.error("Authentication Error:", err);
+        localStorage.removeItem("token");
+        navigate("/");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode;
+    setDarkMode(newDarkMode);
+    localStorage.setItem("darkMode", newDarkMode);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <ThemeProvider
+      theme={createTheme({
+        palette: { mode: darkMode ? "dark" : "light" },
+        typography: { fontFamily: "Roboto, sans-serif" },
+      })}
+    >
+      <Box sx={{ display: "flex" }}>
+        <CssBaseline />
+
+        {/* AppBar */}
+        <StyledAppBar
+          position="fixed"
+          sx={{
+            backgroundColor: darkMode ? "#333" : "#1976d2",
+            color: "#fff",
+          }}
+        >
+          <Toolbar>
+            <IconButton edge="start" onClick={toggleSidebar} sx={{ color: "inherit", mr: 2 }}>
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Church CMS Dashboard
+            </Typography>
+            <IconButton onClick={toggleDarkMode} sx={{ color: "inherit" }}>
+              {darkMode ? <Brightness7 /> : <Brightness4 />}
+            </IconButton>
+            <IconButton sx={{ color: "inherit" }}>
+              <Avatar>{user?.name ? user.name[0].toUpperCase() : "U"}</Avatar>
+            </IconButton>
+          </Toolbar>
+        </StyledAppBar>
+
+        {/* Sidebar */}
+        <Sidebar variant="permanent" open={sidebarOpen}>
+          <Toolbar />
+          <List>
+            {[...gridSections, ...sidebarSections].map((section, index) => (
+              <ListItem key={index} disablePadding>
+                <ListItemButton onClick={() => navigate(section.path)}>
+                  <ListItemIcon sx={{ color: "inherit" }}>{section.icon}</ListItemIcon>
+                  {sidebarOpen && <ListItemText primary={section.title} />}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Sidebar>
+
+        {/* Main Content */}
+        <MainContent sx={{ mt: 8, width: "100%" }}>
+          <Grid container spacing={3}>
+            {gridSections.map((section, index) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                <StyledCard onClick={() => navigate(section.path)}>
+                  <ListItemIcon>{section.icon}</ListItemIcon>
+                  <Typography variant="h6">{section.title}</Typography>
+                </StyledCard>
+              </Grid>
+            ))}
+          </Grid>
+        </MainContent>
+      </Box>
+    </ThemeProvider>
+  );
+};
+
+export default Dashboard;

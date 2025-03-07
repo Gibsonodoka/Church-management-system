@@ -39,7 +39,6 @@ const Dashboard = () => {
           navigate("/login");
         });
 
-      // Fetch Dashboard Statistics
       axios
         .get("http://127.0.0.1:8000/api/dashboard-stats", {
           headers: { Authorization: `Bearer ${token}` },
@@ -55,26 +54,22 @@ const Dashboard = () => {
 
   return (
     <div className="sb-nav-fixed">
-      {/* Navbar */}
       <Navbar />
 
       <div id="layoutSidenav">
-        {/* Sidebar */}
         <div id="layoutSidenav_nav">
           <Sidebar />
         </div>
 
-        {/* Main Content */}
         <div id="layoutSidenav_content">
           <main>
             <div className="container-fluid px-4">
               <h1 className="mt-4">Dashboard</h1>
               <p>Welcome {user ? user.name : "Loading..."} to Our Church Management System</p>
 
-              {/* Dashboard Cards with Icons */}
               <div className="row">
                 {[
-                  { title: "Church Members", count: stats.members, color: "bg-primary text-white", icon: "fas fa-users" },
+                  { title: "Church Members", count: stats.members, color: "bg-primary text-white", icon: "fas fa-users", route: "/members" },
                   { title: "Visitors", count: stats.visitors, color: "bg-success text-white", icon: "fas fa-user-plus" },
                   { title: "Church Inventory", count: stats.inventory, color: "bg-warning text-white", icon: "fas fa-box" },
                   { title: "Departments", count: stats.departments, color: "bg-danger text-white", icon: "fas fa-building" },
@@ -84,16 +79,22 @@ const Dashboard = () => {
                   { title: "Attendance System", count: stats.attendance, color: "bg-light text-dark", icon: "fas fa-clipboard-list" },
                 ].map((card, index) => (
                   <div key={index} className="col-xl-3 col-md-6">
-                    <div className={`card ${card.color} mb-4`}>
+                    <div 
+                      className={`card ${card.color} mb-4`} 
+                      onClick={() => card.route && navigate(card.route)} 
+                      style={{ cursor: card.route ? "pointer" : "default" }}
+                    >
                       <div className="card-body d-flex align-items-center justify-content-between">
                         <div>
                           <h5>{card.title}</h5>
-                          <h3>{card.count}</h3> {/* Display the count */}
+                          <h3>{card.count}</h3>
                         </div>
                         <i className={`${card.icon} fa-2x`}></i>
                       </div>
                       <div className="card-footer d-flex align-items-center justify-content-between">
-                        <a className={`small ${card.color.includes("bg-light") ? "text-dark" : "text-white"} stretched-link`} href="#">View Details</a>
+                        <span className={`small ${card.color.includes("bg-light") ? "text-dark" : "text-white"} stretched-link`}>
+                          {card.route ? "View Details" : ""}
+                        </span>
                         <div className={`small ${card.color.includes("bg-light") ? "text-dark" : "text-white"}`}>
                           <i className="fas fa-angle-right"></i>
                         </div>
@@ -103,7 +104,6 @@ const Dashboard = () => {
                 ))}
               </div>
 
-              {/* Charts Section */}
               <div className="row">
                 <div className="col-xl-6">
                   <div className="card mb-4">
@@ -128,7 +128,6 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Area Chart & Visitors Table */}
               <div className="row">
                 <div className="col-xl-6">
                   <div className="card mb-4">
@@ -148,7 +147,6 @@ const Dashboard = () => {
             </div>
           </main>
 
-          {/* Footer */}
           <Footer />
         </div>
       </div>

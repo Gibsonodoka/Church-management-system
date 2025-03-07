@@ -10,6 +10,10 @@ const Sidebar = () => {
             <div className="sb-nav-link-icon"><i className="fas fa-tachometer-alt"></i></div>
             Dashboard
           </Link>
+          <Link className="nav-link" to="/users">
+            <div className="sb-nav-link-icon"><i className="fas fa-user"></i></div>
+            Users
+          </Link>
 
           <div className="sb-sidenav-menu-heading">Church Management</div>
           <Link className="nav-link" to="/members">

@@ -62,6 +62,10 @@ class AuthController extends Controller
             'token' => $token
         ], 200);
     }
+    public function showLoginForm() {
+    return view('auth.login');
+}
+
 
     /**
      * Handle user logout (API-based).

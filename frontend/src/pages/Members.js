@@ -4,10 +4,14 @@ import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import axios from "axios";
+import ReactPaginate from "react-paginate";
+import "../css/main.css";
 
 const Members = () => {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const itemsPerPage = 5; // Number of members per page
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,6 +31,16 @@ const Members = () => {
         });
     }
   }, [navigate]);
+
+  // Get members for the current page
+  const offset = currentPage * itemsPerPage;
+  const currentMembers = members.slice(offset, offset + itemsPerPage);
+  const pageCount = Math.ceil(members.length / itemsPerPage);
+
+  // Handle page change
+  const handlePageClick = ({ selected }) => {
+    setCurrentPage(selected);
+  };
 
   return (
     <div className="sb-nav-fixed">
@@ -64,8 +78,8 @@ const Members = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {members.length > 0 ? (
-                        members.map((member) => (
+                      {currentMembers.length > 0 ? (
+                        currentMembers.map((member) => (
                           <tr key={member.id}>
                             <td>{member.id}</td>
                             <td>{member.first_name}</td>
@@ -84,6 +98,19 @@ const Members = () => {
                       )}
                     </tbody>
                   </table>
+
+                  {/* Pagination */}
+                  <ReactPaginate
+                    previousLabel={"← Previous"}
+                    nextLabel={"Next →"}
+                    breakLabel={"..."}
+                    pageCount={pageCount}
+                    marginPagesDisplayed={1}
+                    pageRangeDisplayed={2}
+                    onPageChange={handlePageClick}
+                    containerClassName={"pagination"}
+                    activeClassName={"active"}
+                  />
                 </div>
               </div>
             </div>

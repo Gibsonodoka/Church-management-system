@@ -11,7 +11,8 @@ const Members = () => {
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const itemsPerPage = 5; // Number of members per page
+  const [searchTerm, setSearchTerm] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,10 +33,17 @@ const Members = () => {
     }
   }, [navigate]);
 
+  // Filter members based on search input
+  const filteredMembers = members.filter((member) =>
+    `${member.first_name} ${member.last_name} ${member.email} ${member.phone}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
+
   // Get members for the current page
   const offset = currentPage * itemsPerPage;
-  const currentMembers = members.slice(offset, offset + itemsPerPage);
-  const pageCount = Math.ceil(members.length / itemsPerPage);
+  const currentMembers = filteredMembers.slice(offset, offset + itemsPerPage);
+  const pageCount = Math.ceil(filteredMembers.length / itemsPerPage);
 
   // Handle page change
   const handlePageClick = ({ selected }) => {
@@ -60,12 +68,49 @@ const Members = () => {
               <h1 className="mt-4">Members</h1>
               <p>List of all church members</p>
 
-              {/* Members Table */}
+              {/* Members Table Card */}
               <div className="card mb-4">
                 <div className="card-header">
                   <i className="fas fa-table me-1"></i> Church Members
                 </div>
                 <div className="card-body">
+                  
+                  {/* Search & Entries Selector Inside Table Container */}
+                  <div className="d-flex justify-content-between align-items-center mb-3">
+                    <div className="d-flex align-items-center">
+                      <label className="me-2">Show</label>
+                      <select
+                        className="form-select d-inline w-auto"
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                          setItemsPerPage(parseInt(e.target.value));
+                          setCurrentPage(0);
+                        }}
+                      >
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                      </select>
+                      <label className="ms-2">entries</label>
+                    </div>
+
+                    {/* Search Input Inside Table Container */}
+                    <div className="input-group w-auto">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search members..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <span className="input-group-text">
+                        <i className="fas fa-search"></i>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Members Table */}
                   <table className="table table-bordered">
                     <thead className="table-light">
                       <tr>

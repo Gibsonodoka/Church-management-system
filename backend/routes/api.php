@@ -12,6 +12,7 @@ use App\Http\Controllers\MemberController;
 |--------------------------------------------------------------------------
 */
 Route::get('/members', [MemberController::class, 'index']);
+Route::post('/members', [MemberController::class, 'store']);
 // Public routes (No authentication required)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']); // Users can register themselves

@@ -14,6 +14,15 @@ class Member extends Model
         'last_name',
         'email',
         'phone',
+        'gender',
         'dob',
+        'address',
+        'marital_status',
+        'baptized',
+        'membership_class',
+        'house_fellowship',
+        'organization_belonged_to',
+        'current_team',
     ];
+    
 }

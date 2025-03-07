@@ -12,70 +12,129 @@ const Members = () => {
   const [members, setMembers] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [itemsPerPage, setItemsPerPage] = useState(5); // Default number of items per page
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    gender: "",
+    dob: "",
+    address: "",
+    marital_status: "",
+    baptized: "",
+    membership_class: "",
+    house_fellowship: "",
+    organization: "",
+    current_team: [],
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate("/login");
     } else {
-      axios
-        .get("http://127.0.0.1:8000/api/members", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setMembers(response.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching members:", error);
-        });
+      fetchMembers(token);
     }
   }, [navigate]);
 
-  // Filter members based on search input
+  const fetchMembers = (token) => {
+    axios
+      .get("http://127.0.0.1:8000/api/members", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        setMembers(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching members:", error);
+      });
+  };
+
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    if (type === "checkbox") {
+      setFormData((prevData) => ({
+        ...prevData,
+        current_team: checked
+          ? [...prevData.current_team, value]
+          : prevData.current_team.filter((team) => team !== value),
+      }));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    try {
+      await axios.post("http://127.0.0.1:8000/api/members", formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert("Member added successfully!");
+      setShowModal(false);
+      fetchMembers(token);
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+        gender: "",
+        dob: "",
+        address: "",
+        marital_status: "",
+        baptized: "",
+        membership_class: "",
+        house_fellowship: "",
+        organization: "",
+        current_team: [],
+      });
+    } catch (error) {
+      console.error("Error adding member:", error);
+      alert("Failed to add member. Please try again.");
+    }
+  };
+
   const filteredMembers = members.filter((member) =>
     `${member.first_name} ${member.last_name} ${member.email} ${member.phone}`
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
 
-  // Get members for the current page
   const offset = currentPage * itemsPerPage;
   const currentMembers = filteredMembers.slice(offset, offset + itemsPerPage);
   const pageCount = Math.ceil(filteredMembers.length / itemsPerPage);
 
-  // Handle page change
-  const handlePageClick = ({ selected }) => {
-    setCurrentPage(selected);
-  };
-
   return (
     <div className="sb-nav-fixed">
-      {/* Navbar */}
       <Navbar />
-
       <div id="layoutSidenav">
-        {/* Sidebar */}
         <div id="layoutSidenav_nav">
           <Sidebar />
         </div>
 
-        {/* Main Content */}
         <div id="layoutSidenav_content">
           <main>
             <div className="container-fluid px-4">
               <h1 className="mt-4">Members</h1>
               <p>List of all church members</p>
 
-              {/* Members Table Card */}
+              {/* Add Member Button */}
+              <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>
+                Add Member
+              </button>
+
               <div className="card mb-4">
                 <div className="card-header">
                   <i className="fas fa-table me-1"></i> Church Members
                 </div>
                 <div className="card-body">
-                  
-                  {/* Search & Entries Selector Inside Table Container */}
                   <div className="d-flex justify-content-between align-items-center mb-3">
                     <div className="d-flex align-items-center">
                       <label className="me-2">Show</label>
@@ -94,23 +153,15 @@ const Members = () => {
                       </select>
                       <label className="ms-2">entries</label>
                     </div>
-
-                    {/* Search Input Inside Table Container */}
-                    <div className="input-group w-auto">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search members..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                      <span className="input-group-text">
-                        <i className="fas fa-search"></i>
-                      </span>
-                    </div>
+                    <input
+                      type="text"
+                      className="form-control w-auto"
+                      placeholder="Search members..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
                   </div>
 
-                  {/* Members Table */}
                   <table className="table table-bordered">
                     <thead className="table-light">
                       <tr>
@@ -119,7 +170,6 @@ const Members = () => {
                         <th>Last Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Date of Birth</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -131,28 +181,21 @@ const Members = () => {
                             <td>{member.last_name}</td>
                             <td>{member.email || "N/A"}</td>
                             <td>{member.phone || "N/A"}</td>
-                            <td>{member.dob || "N/A"}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="6" className="text-center">
-                            No members found
-                          </td>
+                          <td colSpan="5" className="text-center">No members found</td>
                         </tr>
                       )}
                     </tbody>
                   </table>
 
-                  {/* Pagination */}
                   <ReactPaginate
                     previousLabel={"← Previous"}
                     nextLabel={"Next →"}
-                    breakLabel={"..."}
                     pageCount={pageCount}
-                    marginPagesDisplayed={1}
-                    pageRangeDisplayed={2}
-                    onPageChange={handlePageClick}
+                    onPageChange={({ selected }) => setCurrentPage(selected)}
                     containerClassName={"pagination"}
                     activeClassName={"active"}
                   />
@@ -160,11 +203,98 @@ const Members = () => {
               </div>
             </div>
           </main>
-
-          {/* Footer */}
           <Footer />
         </div>
       </div>
+
+      {/* Add Member Modal */}
+      {showModal && (
+  <div className="modal show d-block" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Add Member</h5>
+          <button className="btn-close" onClick={() => setShowModal(false)}></button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit}>
+            <input type="text" name="first_name" placeholder="First Name" className="form-control mb-2" value={formData.first_name} onChange={handleChange} required />
+            <input type="text" name="last_name" placeholder="Last Name" className="form-control mb-2" value={formData.last_name} onChange={handleChange} required />
+            <input type="email" name="email" placeholder="Email" className="form-control mb-2" value={formData.email} onChange={handleChange} />
+            <input type="text" name="phone" placeholder="Phone" className="form-control mb-2" value={formData.phone} onChange={handleChange} required />
+
+            <select name="gender" className="form-control mb-2" value={formData.gender} onChange={handleChange} required>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+
+            <input type="date" name="dob" className="form-control mb-2" value={formData.dob} onChange={handleChange} required />
+
+            <input type="text" name="address" placeholder="Address" className="form-control mb-2" value={formData.address} onChange={handleChange} required />
+
+            <select name="marital_status" className="form-control mb-2" value={formData.marital_status} onChange={handleChange} required>
+              <option value="">Select Marital Status</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+
+            <select name="baptized" className="form-control mb-2" value={formData.baptized} onChange={handleChange} required>
+              <option value="">Baptized?</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <select name="membership_class" className="form-control mb-2" value={formData.membership_class} onChange={handleChange} required>
+              <option value="">Membership Class</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+
+            <select name="house_fellowship" className="form-control mb-2" value={formData.house_fellowship} onChange={handleChange} required>
+              <option value="">Select House Fellowship</option>
+              <option value="Rumibekwe">Rumibekwe</option>
+              <option value="Woji">Woji</option>
+              <option value="Rumudara">Rumudara</option>
+              <option value="None">None</option>
+            </select>
+
+            <select name="organization" className="form-control mb-2" value={formData.organization} onChange={handleChange} required>
+              <option value="">Select Organization</option>
+              <option value="Men">Men</option>
+              <option value="Women">Women</option>
+              <option value="Youth">Youth</option>
+              <option value="Teens">Teens</option>
+              <option value="Children">Children</option>
+            </select>
+
+            <label className="form-label">Current Team (Select multiple)</label>
+            <div className="mb-2">
+              {["Drama", "Media", "Technical", "Visitation", "Leadership", "Pastoral", "Sunday school", "None"].map((team) => (
+                <div key={team} className="form-check">
+                  <input
+                    type="checkbox"
+                    name="current_team"
+                    value={team}
+                    checked={formData.current_team.includes(team)}
+                    onChange={handleChange}
+                    className="form-check-input"
+                  />
+                  <label className="form-check-label">{team}</label>
+                </div>
+              ))}
+            </div>
+
+            <button type="submit" className="btn btn-success w-100">Add Member</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

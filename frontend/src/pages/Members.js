@@ -207,93 +207,98 @@ const Members = () => {
         </div>
       </div>
 
-      {/* Add Member Modal */}
-      {showModal && (
+    {/* Add Member Modal */}
+{showModal && (
   <div className="modal show d-block" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
-    <div className="modal-dialog">
+    <div className="modal-dialog modal-lg"> {/* Make modal larger for better spacing */}
       <div className="modal-content">
         <div className="modal-header">
           <h5 className="modal-title">Add Member</h5>
           <button className="btn-close" onClick={() => setShowModal(false)}></button>
         </div>
         <div className="modal-body">
-          <form onSubmit={handleSubmit}>
-            <input type="text" name="first_name" placeholder="First Name" className="form-control mb-2" value={formData.first_name} onChange={handleChange} required />
-            <input type="text" name="last_name" placeholder="Last Name" className="form-control mb-2" value={formData.last_name} onChange={handleChange} required />
-            <input type="email" name="email" placeholder="Email" className="form-control mb-2" value={formData.email} onChange={handleChange} />
-            <input type="text" name="phone" placeholder="Phone" className="form-control mb-2" value={formData.phone} onChange={handleChange} required />
+          <form onSubmit={handleSubmit} className="grid-form">
+            <div className="form-grid">
+              <input type="text" name="first_name" placeholder="First Name" className="form-control" value={formData.first_name} onChange={handleChange} required />
+              <input type="text" name="last_name" placeholder="Last Name" className="form-control" value={formData.last_name} onChange={handleChange} required />
+              <input type="email" name="email" placeholder="Email" className="form-control" value={formData.email} onChange={handleChange} />
+              <input type="text" name="phone" placeholder="Phone" className="form-control" value={formData.phone} onChange={handleChange} required />
+              
+              <select name="gender" className="form-control" value={formData.gender} onChange={handleChange} required>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
 
-            <select name="gender" className="form-control mb-2" value={formData.gender} onChange={handleChange} required>
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
+              <input type="date" name="dob" className="form-control" value={formData.dob} onChange={handleChange} required />
+              <input type="text" name="address" placeholder="Address" className="form-control" value={formData.address} onChange={handleChange} required />
 
-            <input type="date" name="dob" className="form-control mb-2" value={formData.dob} onChange={handleChange} required />
+              <select name="marital_status" className="form-control" value={formData.marital_status} onChange={handleChange} required>
+                <option value="">Select Marital Status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Divorced">Divorced</option>
+                <option value="Widowed">Widowed</option>
+              </select>
 
-            <input type="text" name="address" placeholder="Address" className="form-control mb-2" value={formData.address} onChange={handleChange} required />
+              <select name="baptized" className="form-control" value={formData.baptized} onChange={handleChange} required>
+                <option value="">Baptized?</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
 
-            <select name="marital_status" className="form-control mb-2" value={formData.marital_status} onChange={handleChange} required>
-              <option value="">Select Marital Status</option>
-              <option value="Single">Single</option>
-              <option value="Married">Married</option>
-              <option value="Divorced">Divorced</option>
-              <option value="Widowed">Widowed</option>
-            </select>
+              <select name="membership_class" className="form-control" value={formData.membership_class} onChange={handleChange} required>
+                <option value="">Membership Class</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
 
-            <select name="baptized" className="form-control mb-2" value={formData.baptized} onChange={handleChange} required>
-              <option value="">Baptized?</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
+              <select name="house_fellowship" className="form-control" value={formData.house_fellowship} onChange={handleChange} required>
+                <option value="">Select House Fellowship</option>
+                <option value="Rumibekwe">Rumibekwe</option>
+                <option value="Woji">Woji</option>
+                <option value="Rumudara">Rumudara</option>
+                <option value="None">None</option>
+              </select>
 
-            <select name="membership_class" className="form-control mb-2" value={formData.membership_class} onChange={handleChange} required>
-              <option value="">Membership Class</option>
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
-
-            <select name="house_fellowship" className="form-control mb-2" value={formData.house_fellowship} onChange={handleChange} required>
-              <option value="">Select House Fellowship</option>
-              <option value="Rumibekwe">Rumibekwe</option>
-              <option value="Woji">Woji</option>
-              <option value="Rumudara">Rumudara</option>
-              <option value="None">None</option>
-            </select>
-
-            <select name="organization" className="form-control mb-2" value={formData.organization} onChange={handleChange} required>
-              <option value="">Select Organization</option>
-              <option value="Men">Men</option>
-              <option value="Women">Women</option>
-              <option value="Youth">Youth</option>
-              <option value="Teens">Teens</option>
-              <option value="Children">Children</option>
-            </select>
-
-            <label className="form-label">Current Team (Select multiple)</label>
-            <div className="mb-2">
-              {["Drama", "Media", "Technical", "Visitation", "Leadership", "Pastoral", "Sunday school", "None"].map((team) => (
-                <div key={team} className="form-check">
-                  <input
-                    type="checkbox"
-                    name="current_team"
-                    value={team}
-                    checked={formData.current_team.includes(team)}
-                    onChange={handleChange}
-                    className="form-check-input"
-                  />
-                  <label className="form-check-label">{team}</label>
-                </div>
-              ))}
+              <select name="organization" className="form-control" value={formData.organization} onChange={handleChange} required>
+                <option value="">Select Organization</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Youth">Youth</option>
+                <option value="Teens">Teens</option>
+                <option value="Children">Children</option>
+              </select>
             </div>
 
-            <button type="submit" className="btn btn-success w-100">Add Member</button>
+            {/* Checkbox Section - Full width */}
+            <div className="checkbox-section">
+              <label className="form-label">Current Team (Select multiple)</label>
+              <div className="d-flex flex-wrap gap-2">
+                {["Drama", "Media", "Technical", "Visitation", "Leadership", "Pastoral", "Sunday school", "None"].map((team) => (
+                  <div key={team} className="form-check">
+                    <input
+                      type="checkbox"
+                      name="current_team"
+                      value={team}
+                      checked={formData.current_team.includes(team)}
+                      onChange={handleChange}
+                      className="form-check-input"
+                    />
+                    <label className="form-check-label">{team}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button type="submit" className="btn btn-success w-100 mt-3">Add Member</button>
           </form>
         </div>
       </div>
     </div>
   </div>
 )}
+
 
     </div>
   );

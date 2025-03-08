@@ -100,3 +100,12 @@
 .pagination .next:hover {
   background-color: #007bff; /* Lighter blue */
 }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Two columns layout */
+  gap: 15px; /* Space between elements */
+}
+
+.checkbox-section {
+  margin-top: 15px;
+}

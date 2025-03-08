@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import ChartComponent from "../components/ChartComponent"; 
 import VisitorsTable from "../components/VisitorsTable"; 
 import axios from "axios";
+import CountUp from "react-countup";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -69,7 +70,13 @@ const Dashboard = () => {
 
               <div className="row">
                 {[
-                  { title: "Church Members", count: stats.members, color: "bg-primary text-white", icon: "fas fa-users", route: "/members" },
+                  { 
+                    title: "Church Members", 
+                    count: stats.members, 
+                    color: "bg-primary text-white", 
+                    icon: "fas fa-users", 
+                    route: "/members" 
+                  },
                   { title: "Visitors", count: stats.visitors, color: "bg-success text-white", icon: "fas fa-user-plus" },
                   { title: "Church Inventory", count: stats.inventory, color: "bg-warning text-white", icon: "fas fa-box" },
                   { title: "Departments", count: stats.departments, color: "bg-danger text-white", icon: "fas fa-building" },
@@ -87,7 +94,15 @@ const Dashboard = () => {
                       <div className="card-body d-flex align-items-center justify-content-between">
                         <div>
                           <h5>{card.title}</h5>
-                          <h3>{card.count}</h3>
+                          <h3>
+                            <CountUp 
+                              key={card.count} // Forces re-render when count updates
+                              start={0} 
+                              end={card.count} 
+                              duration={2} 
+                              separator="," 
+                            />
+                          </h3>
                         </div>
                         <i className={`${card.icon} fa-2x`}></i>
                       </div>

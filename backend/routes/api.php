@@ -5,12 +5,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\DashboardController;
+
+
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
+Route::middleware('auth:sanctum')->get('/dashboard-stats', [DashboardController::class, 'getStats']);
 Route::get('/members', [MemberController::class, 'index']);
 Route::post('/members', [MemberController::class, 'store']);
 // Public routes (No authentication required)

@@ -15,7 +15,18 @@ class MemberController extends Controller
     {
         return response()->json(Member::all(), 200);
     }
-
+// Import function
+    public function importMembers(Request $request) {
+        foreach ($request->all() as $memberData) {
+            Member::create([
+                'name' => $memberData['name'],
+                'email' => $memberData['email'],
+                'phone' => $memberData['phone'],
+            ]);
+        }
+    
+        return response()->json(['message' => 'Import successful'], 200);
+    }
     // Store a new member
     public function store(Request $request)
     {

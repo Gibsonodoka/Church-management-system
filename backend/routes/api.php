@@ -14,6 +14,7 @@ use App\Http\Controllers\DashboardController;
 | API Routes
 |--------------------------------------------------------------------------
 */
+Route::post('/members/import', [MemberController::class, 'importMembers']);
 Route::middleware('auth:sanctum')->get('/dashboard-stats', [DashboardController::class, 'getStats']);
 Route::get('/members', [MemberController::class, 'index']);
 Route::post('/members', [MemberController::class, 'store']);

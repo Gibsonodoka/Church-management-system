@@ -7,7 +7,6 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "../css/main.css";
 import { CSVLink } from "react-csv";
-import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
@@ -21,11 +20,17 @@ const Visitors = () => {
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
+    gender: "",
     email: "",
     phone: "",
+    dob: "",
     address: "",
+    invited_by: "",
+    occupation: "",
     visit_date: "",
     reason_for_visit: "",
+    would_like_visit: "",
+    want_membership: "",
   });
 
   useEffect(() => {
@@ -64,11 +69,17 @@ const Visitors = () => {
       setFormData({
         first_name: "",
         last_name: "",
+        gender: "",
         email: "",
         phone: "",
+        dob: "",
         address: "",
+        invited_by: "",
+        occupation: "",
         visit_date: "",
         reason_for_visit: "",
+        would_like_visit: "",
+        want_membership: "",
       });
     } catch (error) {
       console.error("Error adding visitor:", error);
@@ -80,10 +91,11 @@ const Visitors = () => {
     const doc = new jsPDF();
     doc.text("Church Visitors List", 10, 10);
     doc.autoTable({
-      head: [["ID", "Name", "Email", "Phone", "Visit Date"]],
+      head: [["ID", "Name", "Gender", "Email", "Phone", "Visit Date"]],
       body: visitors.map((visitor) => [
         visitor.id,
         `${visitor.first_name} ${visitor.last_name}`,
+        visitor.gender,
         visitor.email,
         visitor.phone,
         visitor.visit_date,
@@ -151,6 +163,7 @@ const Visitors = () => {
                         <th>ID</th>
                         <th>First Name</th>
                         <th>Last Name</th>
+                        <th>Gender</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Visit Date</th>
@@ -163,6 +176,7 @@ const Visitors = () => {
                             <td>{visitor.id}</td>
                             <td>{visitor.first_name}</td>
                             <td>{visitor.last_name}</td>
+                            <td>{visitor.gender}</td>
                             <td>{visitor.email || "N/A"}</td>
                             <td>{visitor.phone || "N/A"}</td>
                             <td>{visitor.visit_date}</td>
@@ -170,7 +184,7 @@ const Visitors = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="6" className="text-center">No visitors found</td>
+                          <td colSpan="7" className="text-center">No visitors found</td>
                         </tr>
                       )}
                     </tbody>
@@ -193,27 +207,191 @@ const Visitors = () => {
       </div>
 
       {showModal && (
-        <div className="modal show d-block" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add Visitor</h5>
-                <button className="btn-close" onClick={() => setShowModal(false)}></button>
+  <div className="modal show d-block" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Add Visitor</h5>
+          <button className="btn-close" onClick={() => setShowModal(false)}></button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              {/* First Name */}
+              <div className="col-md-6">
+                <label className="form-label">First Name</label>
+                <input 
+                  type="text" 
+                  name="first_name" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.first_name} 
+                  required 
+                />
               </div>
-              <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  <input type="text" name="first_name" placeholder="First Name" className="form-control mb-2" value={formData.first_name} onChange={handleChange} required />
-                  <input type="text" name="last_name" placeholder="Last Name" className="form-control mb-2" value={formData.last_name} onChange={handleChange} required />
-                  <input type="email" name="email" placeholder="Email" className="form-control mb-2" value={formData.email} onChange={handleChange} />
-                  <input type="text" name="phone" placeholder="Phone" className="form-control mb-2" value={formData.phone} onChange={handleChange} required />
-                  <input type="date" name="visit_date" className="form-control mb-2" value={formData.visit_date} onChange={handleChange} required />
-                  <button type="submit" className="btn btn-primary w-100">Add Visitor</button>
-                </form>
+
+              {/* Last Name */}
+              <div className="col-md-6">
+                <label className="form-label">Last Name</label>
+                <input 
+                  type="text" 
+                  name="last_name" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.last_name} 
+                  required 
+                />
+              </div>
+
+              {/* Gender */}
+              <div className="col-md-6">
+                <label className="form-label">Gender</label>
+                <select 
+                  name="gender" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.gender} 
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+
+              {/* Email */}
+              <div className="col-md-6">
+                <label className="form-label">Email</label>
+                <input 
+                  type="email" 
+                  name="email" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.email} 
+                  required 
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="col-md-6">
+                <label className="form-label">Phone Number</label>
+                <input 
+                  type="text" 
+                  name="phone" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.phone} 
+                  required 
+                />
+              </div>
+
+              {/* Date of Birth */}
+              <div className="col-md-6">
+                <label className="form-label">Date of Birth</label>
+                <input 
+                  type="date" 
+                  name="dob" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.dob} 
+                  required 
+                />
+              </div>
+
+              {/* Address */}
+              <div className="col-md-12">
+                <label className="form-label">Address</label>
+                <input 
+                  type="text" 
+                  name="address" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.address} 
+                  required 
+                />
+              </div>
+
+              {/* Who Invited You? */}
+              <div className="col-md-6">
+                <label className="form-label">Who Invited You?</label>
+                <input 
+                  type="text" 
+                  name="invited_by" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.invited_by} 
+                />
+              </div>
+
+              {/* Occupation */}
+              <div className="col-md-6">
+                <label className="form-label">Occupation</label>
+                <input 
+                  type="text" 
+                  name="occupation" 
+                  className="form-control" 
+                  onChange={handleChange} 
+                  value={formData.occupation} 
+                />
+              </div>
+
+              {/* Would You Like to Be Visited? */}
+              <div className="col-md-6">
+                <label className="form-label">Would you like to be visited?</label>
+                <div>
+                  <input 
+                    type="radio" 
+                    name="would_like_visit" 
+                    value="Yes" 
+                    checked={formData.would_like_visit === "Yes"} 
+                    onChange={handleChange} 
+                  /> Yes
+                  <input 
+                    type="radio" 
+                    name="would_like_visit" 
+                    value="No" 
+                    checked={formData.would_like_visit === "No"} 
+                    onChange={handleChange} 
+                    className="ms-3"
+                  /> No
+                </div>
+              </div>
+
+              {/* Want to be a Member? */}
+              <div className="col-md-6">
+                <label className="form-label">Want to be a member?</label>
+                <div>
+                  <input 
+                    type="radio" 
+                    name="want_membership" 
+                    value="Yes" 
+                    checked={formData.want_membership === "Yes"} 
+                    onChange={handleChange} 
+                  /> Yes
+                  <input 
+                    type="radio" 
+                    name="want_membership" 
+                    value="No" 
+                    checked={formData.want_membership === "No"} 
+                    onChange={handleChange} 
+                    className="ms-3"
+                  /> No
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Submit Button */}
+            <div className="mt-3">
+              <button type="submit" className="btn btn-primary w-100">Add Visitor</button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };

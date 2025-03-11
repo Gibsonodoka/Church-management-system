@@ -6,6 +6,10 @@ import Footer from "../components/Footer";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import "../css/main.css";
+import { CSVLink } from "react-csv";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Members = () => {
   const navigate = useNavigate();
@@ -14,6 +18,8 @@ const Members = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [showModal, setShowModal] = useState(false);
+  const [file, setFile] = useState(null);
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -30,6 +36,9 @@ const Members = () => {
     current_team: [],
   });
 
+
+
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -38,6 +47,62 @@ const Members = () => {
       fetchMembers(token);
     }
   }, [navigate]);
+
+
+  // Function to Export Data as PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Church Members List", 10, 10);
+    doc.autoTable({
+      head: [["ID", "Name", "Email", "Phone"]],
+      body: members.map((member) => [
+        member.id,
+        member.name,
+        member.email,
+        member.phone,
+      ]),
+    });
+    doc.save("Members_List.pdf");
+  };
+
+  // Function to Handle File Import
+  const handleFileUpload = (e) => {
+    const uploadedFile = e.target.files[0];
+    setFile(uploadedFile);
+  };
+
+  // Function to Process Import File
+  const handleImport = async () => {
+    if (!file) {
+      alert("Please select a file first!");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.readAsBinaryString(file);
+    reader.onload = (e) => {
+      const data = e.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const parsedData = XLSX.utils.sheet_to_json(sheet);
+
+      // Send data to backend
+      axios
+        .post("http://127.0.0.1:8000/api/members/import", parsedData, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        })
+        .then(() => {
+          alert("Data imported successfully!");
+          window.location.reload();
+        })
+        .catch((error) => {
+          console.error("Error importing data:", error);
+          alert("Import failed. Check console for details.");
+        });
+    };
+  };
+
 
   const fetchMembers = (token) => {
     axios
@@ -129,6 +194,28 @@ const Members = () => {
               <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>
                 Add Member
               </button>
+
+              <div className="mb-3">
+                {/* Export Buttons */}
+                <CSVLink
+                  data={members}
+                  filename={"Members_List.csv"}
+                  className="btn btn-success me-2"
+                >
+                  Export CSV
+                </CSVLink>
+                <button onClick={exportToPDF} className="btn btn-danger">
+                  Export PDF
+                </button>
+              </div>
+
+              <div className="mb-3">
+                {/* Import Section */}
+                <input type="file" accept=".xlsx,.csv" onChange={handleFileUpload} />
+                <button onClick={handleImport} className="btn btn-primary ms-2">
+                  Import
+                </button>
+              </div>
 
               <div className="card mb-4">
                 <div className="card-header">

@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\VisitorController;
 
 
 
@@ -14,6 +15,13 @@ use App\Http\Controllers\DashboardController;
 | API Routes
 |--------------------------------------------------------------------------
 */
+
+
+Route::get('/visitors', [VisitorController::class, 'index']);
+Route::post('/visitors', [VisitorController::class, 'store']);
+Route::put('/visitors/{id}', [VisitorController::class, 'update']);
+Route::delete('/visitors/{id}', [VisitorController::class, 'destroy']);
+
 Route::post('/members/import', [MemberController::class, 'importMembers']);
 Route::middleware('auth:sanctum')->get('/dashboard-stats', [DashboardController::class, 'getStats']);
 Route::get('/members', [MemberController::class, 'index']);

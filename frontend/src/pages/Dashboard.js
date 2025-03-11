@@ -77,7 +77,7 @@ const Dashboard = () => {
                     icon: "fas fa-users", 
                     route: "/members" 
                   },
-                  { title: "Visitors", count: stats.visitors, color: "bg-success text-white", icon: "fas fa-user-plus" },
+                  { title: "Visitors", count: stats.visitors, color: "bg-success text-white", icon: "fas fa-user-plus" ,  route: "/visitors"},
                   { title: "Church Inventory", count: stats.inventory, color: "bg-warning text-white", icon: "fas fa-box" },
                   { title: "Departments", count: stats.departments, color: "bg-danger text-white", icon: "fas fa-building" },
                   { title: "Finance", count: stats.finance, color: "bg-info text-white", icon: "fas fa-wallet" },

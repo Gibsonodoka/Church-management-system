@@ -18,8 +18,8 @@ const Visitors = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    firstname: "",
+    lastname: "",
     gender: "",
     email: "",
     phone: "",
@@ -27,11 +27,10 @@ const Visitors = () => {
     address: "",
     invited_by: "",
     occupation: "",
-    visit_date: "",
-    reason_for_visit: "",
-    would_like_visit: "",
-    want_membership: "",
+    visit_request: "",  // Matches Laravel's "visit_request"
+    membership_interest: "", // Matches Laravel's "membership_interest"
   });
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -58,17 +57,22 @@ const Visitors = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
+  
     try {
-      await axios.post("http://127.0.0.1:8000/api/visitors", formData, {
+      const response = await axios.post("http://127.0.0.1:8000/api/visitors", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      console.log("Success:", response.data);
       alert("Visitor added successfully!");
+      
       setShowModal(false);
       fetchVisitors(token);
+      
+      // Reset form
       setFormData({
-        first_name: "",
-        last_name: "",
+        firstname: "",
+        lastname: "",
         gender: "",
         email: "",
         phone: "",
@@ -76,17 +80,28 @@ const Visitors = () => {
         address: "",
         invited_by: "",
         occupation: "",
-        visit_date: "",
-        reason_for_visit: "",
-        would_like_visit: "",
-        want_membership: "",
+        visit_request: "",  // Matches Laravel's "visit_request"
+        membership_interest: "",
       });
+  
     } catch (error) {
       console.error("Error adding visitor:", error);
-      alert("Failed to add visitor. Please try again.");
+      
+      // Log error details
+      if (error.response) {
+        console.log("Server Response:", error.response.data);
+        console.log("Status Code:", error.response.status);
+        alert(`Failed to add visitor: ${error.response.data.message || "Unknown error"}`);
+      } else if (error.request) {
+        console.log("No response received:", error.request);
+        alert("Failed to add visitor: No response from server.");
+      } else {
+        console.log("Axios error:", error.message);
+        alert("Failed to add visitor: " + error.message);
+      }
     }
   };
-
+  
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Church Visitors List", 10, 10);
@@ -222,7 +237,7 @@ const Visitors = () => {
                 <label className="form-label">First Name</label>
                 <input 
                   type="text" 
-                  name="first_name" 
+                  name="firstname" 
                   className="form-control" 
                   onChange={handleChange} 
                   value={formData.first_name} 
@@ -235,7 +250,7 @@ const Visitors = () => {
                 <label className="form-label">Last Name</label>
                 <input 
                   type="text" 
-                  name="last_name" 
+                  name="lastname" 
                   className="form-control" 
                   onChange={handleChange} 
                   value={formData.last_name} 
@@ -339,21 +354,20 @@ const Visitors = () => {
               <div className="col-md-6">
                 <label className="form-label">Would you like to be visited?</label>
                 <div>
+                <input type="radio" 
+                   name="visit_request" 
+                      value="Yes" 
+                      checked={formData.visit_request === "Yes"} 
+                      onChange={handleChange} 
+                      /> Yes
                   <input 
-                    type="radio" 
-                    name="would_like_visit" 
-                    value="Yes" 
-                    checked={formData.would_like_visit === "Yes"} 
-                    onChange={handleChange} 
-                  /> Yes
-                  <input 
-                    type="radio" 
-                    name="would_like_visit" 
-                    value="No" 
-                    checked={formData.would_like_visit === "No"} 
-                    onChange={handleChange} 
-                    className="ms-3"
-                  /> No
+                      type="radio" 
+                      name="visit_request" 
+                      value="No" 
+                      checked={formData.visit_request === "No"} 
+                      onChange={handleChange} 
+                      className="ms-3"
+                    /> No
                 </div>
               </div>
 
@@ -363,19 +377,20 @@ const Visitors = () => {
                 <div>
                   <input 
                     type="radio" 
-                    name="want_membership" 
+                    name="membership_interest" 
                     value="Yes" 
-                    checked={formData.want_membership === "Yes"} 
+                    checked={formData.membership_interest === "Yes"} 
                     onChange={handleChange} 
                   /> Yes
                   <input 
                     type="radio" 
-                    name="want_membership" 
+                    name="membership_interest" 
                     value="No" 
-                    checked={formData.want_membership === "No"} 
+                    checked={formData.membership_interest === "No"} 
                     onChange={handleChange} 
                     className="ms-3"
                   /> No
+
                 </div>
               </div>
             </div>

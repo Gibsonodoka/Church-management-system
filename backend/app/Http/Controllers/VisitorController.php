@@ -4,64 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Models\Visitor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class VisitorController extends Controller
 {
-    // List all visitors
-    public function index() {
+    // Fetch all visitors
+    public function index()
+    {
         return response()->json(Visitor::all());
     }
 
-    // Store new visitor
-    public function store(Request $request) {
-        $validator = Validator::make($request->all(), [
+    // Store a new visitor
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
             'firstname' => 'required|string|max:255',
             'lastname' => 'required|string|max:255',
-            'gender' => 'required|in:Male,Female,Other',
-            'email' => 'required|email|unique:visitors,email',
-            'phone' => 'required|string|max:15',
-            'dob' => 'required|date',
-            'address' => 'required|string',
-            'invited_by' => 'nullable|string',
-            'occupation' => 'nullable|string',
-            'visit_request' => 'boolean',
-            'membership_interest' => 'boolean',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'required|string|max:20',
+            'dob' => 'nullable|date',
+           'gender' => 'required|string|in:M,F',
+            'address' => 'nullable|string',
+            'want_to_be_member' => 'required|boolean',
+            'would_like_visit' => 'required|boolean',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $visitor = Visitor::create($request->all());
+        $visitor = Visitor::create($validatedData);
         return response()->json($visitor, 201);
     }
 
-    // Show a specific visitor
-    public function show($id) {
-        $visitor = Visitor::find($id);
-        return $visitor ? response()->json($visitor) : response()->json(['message' => 'Visitor not found'], 404);
-    }
+    // Update an existing visitor
+    public function update(Request $request, $id)
+    {
+        $visitor = Visitor::findOrFail($id);
 
-    // Update visitor details
-    public function update(Request $request, $id) {
-        $visitor = Visitor::find($id);
-        if (!$visitor) {
-            return response()->json(['message' => 'Visitor not found'], 404);
-        }
+        $validatedData = $request->validate([
+            'firstname' => 'sometimes|string|max:255',
+            'lastname' => 'sometimes|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'sometimes|string|max:20',
+            'dob' => 'nullable|date',
+            'gender' => 'sometimes|string|in:M,F',
+            'address' => 'nullable|string',
+            'want_to_be_member' => 'sometimes|boolean',
+            'would_like_visit' => 'sometimes|boolean',
+        ]);
 
-        $visitor->update($request->all());
+        $visitor->update($validatedData);
         return response()->json($visitor);
     }
 
     // Delete a visitor
-    public function destroy($id) {
-        $visitor = Visitor::find($id);
-        if (!$visitor) {
-            return response()->json(['message' => 'Visitor not found'], 404);
-        }
-
+    public function destroy($id)
+    {
+        $visitor = Visitor::findOrFail($id);
         $visitor->delete();
+
         return response()->json(['message' => 'Visitor deleted successfully']);
     }
 }

@@ -10,12 +10,18 @@ use App\Http\Controllers\VisitorController;
 
 
 
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
 
+
+Route::get('/visitors', [VisitorController::class, 'index']); // Fetch all visitors
+Route::post('/visitors', [VisitorController::class, 'store']); // Add a new visitor
+Route::put('/visitors/{id}', [VisitorController::class, 'update']); // Update visitor
+Route::delete('/visitors/{id}', [VisitorController::class, 'destroy']); // Delete visitor
 
 
 Route::post('/members/import', [MemberController::class, 'importMembers']);
@@ -29,11 +35,7 @@ Route::post('/register', [AuthController::class, 'register']); // Users can regi
 // Protected routes (Require authentication via Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::get('/visitors', [VisitorController::class, 'index']);
-    Route::post('/visitors', [VisitorController::class, 'store']);
-    Route::get('/visitors/{id}', [VisitorController::class, 'show']);
-    Route::put('/visitors/{id}', [VisitorController::class, 'update']);
-    Route::delete('/visitors/{id}', [VisitorController::class, 'destroy']);
+   
 
     // Get authenticated user details
     Route::get('/user', function (Request $request) {

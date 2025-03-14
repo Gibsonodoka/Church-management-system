@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 const Visitors = () => {
     const [visitors, setVisitors] = useState([]);
@@ -36,7 +39,7 @@ const Visitors = () => {
         }));
     };
 
-    // Add new visitor
+    // Add or update visitor
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -74,55 +77,138 @@ const Visitors = () => {
     };
 
     return (
-        <div>
-            <h2>Visitors Management</h2>
-            
-            <form onSubmit={handleSubmit}>
-                <input type="text" name="firstname" value={newVisitor.firstname} onChange={handleChange} placeholder="First Name" required />
-                <input type="text" name="lastname" value={newVisitor.lastname} onChange={handleChange} placeholder="Last Name" required />
-                <input type="text" name="phone" value={newVisitor.phone} onChange={handleChange} placeholder="Phone Number" required />
-                
-                <select name="gender" value={newVisitor.gender} onChange={handleChange} required>
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                </select>
+        <div className="sb-nav-fixed">
+            <Navbar />
+            <div id="layoutSidenav">
+                <div id="layoutSidenav_nav">
+                    <Sidebar />
+                </div>
 
-                <label>
-                    <input type="checkbox" name="want_to_be_member" checked={newVisitor.want_to_be_member} onChange={handleChange} />
-                    Want to be a member?
-                </label>
-                <label>
-                    <input type="checkbox" name="would_like_visit" checked={newVisitor.would_like_visit} onChange={handleChange} />
-                    Would like a visit?
-                </label>
+                <div id="layoutSidenav_content">
+                    <main>
+                        <div className="container-fluid px-4">
+                            <h1 className="mt-4">Visitors Management</h1>
 
-                <button type="submit">{editingVisitor ? "Update" : "Add"} Visitor</button>
-            </form>
+                            {/* Visitor Form */}
+                            <form onSubmit={handleSubmit} className="mb-4">
+                                <div className="row g-3">
+                                    <div className="col-md-4">
+                                        <input
+                                            type="text"
+                                            name="firstname"
+                                            value={newVisitor.firstname}
+                                            onChange={handleChange}
+                                            placeholder="First Name"
+                                            className="form-control"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <input
+                                            type="text"
+                                            name="lastname"
+                                            value={newVisitor.lastname}
+                                            onChange={handleChange}
+                                            placeholder="Last Name"
+                                            className="form-control"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <input
+                                            type="text"
+                                            name="phone"
+                                            value={newVisitor.phone}
+                                            onChange={handleChange}
+                                            placeholder="Phone Number"
+                                            className="form-control"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <select
+                                            name="gender"
+                                            value={newVisitor.gender}
+                                            onChange={handleChange}
+                                            className="form-control"
+                                            required
+                                        >
+                                            <option value="M">Male</option>
+                                            <option value="F">Female</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-check-label">
+                                            <input
+                                                type="checkbox"
+                                                name="want_to_be_member"
+                                                checked={newVisitor.want_to_be_member}
+                                                onChange={handleChange}
+                                                className="form-check-input"
+                                            />
+                                            Want to be a member?
+                                        </label>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-check-label">
+                                            <input
+                                                type="checkbox"
+                                                name="would_like_visit"
+                                                checked={newVisitor.would_like_visit}
+                                                onChange={handleChange}
+                                                className="form-check-input"
+                                            />
+                                            Would like a visit?
+                                        </label>
+                                    </div>
+                                    <div className="col-md-12">
+                                        <button type="submit" className="btn btn-primary">
+                                            {editingVisitor ? "Update" : "Add"} Visitor
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
 
-            <h3>Visitor List</h3>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Gender</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {visitors.map((visitor) => (
-                        <tr key={visitor.id}>
-                            <td>{visitor.firstname} {visitor.lastname}</td>
-                            <td>{visitor.phone}</td>
-                            <td>{visitor.gender}</td>
-                            <td>
-                                <button onClick={() => handleEdit(visitor)}>Edit</button>
-                                <button onClick={() => handleDelete(visitor.id)}>Delete</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                            {/* Visitor List */}
+                            <h3>Visitor List</h3>
+                            <table className="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Gender</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {visitors.map((visitor) => (
+                                        <tr key={visitor.id}>
+                                            <td>{visitor.firstname} {visitor.lastname}</td>
+                                            <td>{visitor.phone}</td>
+                                            <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
+                                            <td>
+                                                <button
+                                                    className="btn btn-sm btn-warning me-2"
+                                                    onClick={() => handleEdit(visitor)}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-danger"
+                                                    onClick={() => handleDelete(visitor.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </main>
+                    <Footer />
+                </div>
+            </div>
         </div>
     );
 };

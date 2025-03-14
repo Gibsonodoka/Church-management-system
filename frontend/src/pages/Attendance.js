@@ -9,8 +9,8 @@ const Attendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [newAttendance, setNewAttendance] = useState({
         date: "",
-        month: "",
-        service_description: "",
+        month: "January", // Default month
+        service_description: "Sunday Service", // Default service
         men: "",
         women: "",
         youth: "",
@@ -41,28 +41,49 @@ const Attendance = () => {
     // Handle form input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setNewAttendance((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setNewAttendance((prev) => {
+            const updatedAttendance = {
+                ...prev,
+                [name]: value,
+            };
+
+            // Automatically calculate the total
+            if (["men", "women", "youth", "teens", "children"].includes(name)) {
+                const total =
+                    parseInt(updatedAttendance.men || 0) +
+                    parseInt(updatedAttendance.women || 0) +
+                    parseInt(updatedAttendance.youth || 0) +
+                    parseInt(updatedAttendance.teens || 0) +
+                    parseInt(updatedAttendance.children || 0);
+                updatedAttendance.total = total.toString();
+            }
+
+            return updatedAttendance;
+        });
     };
 
     // Add or update attendance record
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("Submitting data:", newAttendance); // Debugging
         try {
+            const formattedData = {
+                ...newAttendance,
+                date: new Date(newAttendance.date).toISOString().split('T')[0], // Format date as YYYY-MM-DD
+            };
+
             if (editingRecord) {
                 // Update record
-                await axios.put(`http://127.0.0.1:8000/api/attendance/${editingRecord.id}`, newAttendance);
+                await axios.put(`http://127.0.0.1:8000/api/attendance/${editingRecord.id}`, formattedData);
                 setEditingRecord(null);
             } else {
                 // Create new record
-                await axios.post("http://127.0.0.1:8000/api/attendance", newAttendance);
+                await axios.post("http://127.0.0.1:8000/api/attendance", formattedData);
             }
             setNewAttendance({
                 date: "",
-                month: "",
-                service_description: "",
+                month: "January", // Reset to default month
+                service_description: "Sunday Service", // Reset to default service
                 men: "",
                 women: "",
                 youth: "",
@@ -71,9 +92,16 @@ const Attendance = () => {
                 total: "",
             });
             setShowModal(false);
-            fetchAttendance();
+            fetchAttendance(); // Refresh the attendance list
         } catch (error) {
             console.error("Error saving attendance:", error);
+            if (error.response) {
+                console.error("Response data:", error.response.data);
+                console.error("Response status:", error.response.status);
+                alert(`Error: ${error.response.data.message || "Failed to save attendance"}`);
+            } else {
+                alert("Network error. Please check your connection.");
+            }
         }
     };
 
@@ -89,9 +117,10 @@ const Attendance = () => {
         if (window.confirm("Are you sure you want to delete this attendance record?")) {
             try {
                 await axios.delete(`http://127.0.0.1:8000/api/attendance/${id}`);
-                fetchAttendance();
+                fetchAttendance(); // Refresh the attendance list
             } catch (error) {
                 console.error("Error deleting attendance record:", error);
+                alert("Failed to delete attendance record.");
             }
         }
     };
@@ -102,8 +131,8 @@ const Attendance = () => {
         setEditingRecord(null);
         setNewAttendance({
             date: "",
-            month: "",
-            service_description: "",
+            month: "January", // Reset to default month
+            service_description: "Sunday Service", // Reset to default service
             men: "",
             women: "",
             youth: "",
@@ -143,7 +172,17 @@ const Attendance = () => {
                             <h1 className="mt-4">Attendance Management</h1>
 
                             {/* Button to Open Add Attendance Modal */}
-                            <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>
+                            <button
+                                className="btn btn-primary mb-3"
+                                onClick={() => {
+                                    setNewAttendance((prev) => ({
+                                        ...prev,
+                                        month: "January", // Set default month
+                                        service_description: "Sunday Service", // Set default service
+                                    }));
+                                    setShowModal(true);
+                                }}
+                            >
                                 Add Attendance
                             </button>
 
@@ -296,12 +335,18 @@ const Attendance = () => {
                                         </div>
 
                                         {/* Attendance Inputs */}
-                                        {["men", "women", "youth", "teens", "children", "total"].map((field) => (
+                                        {["men", "women", "youth", "teens", "children"].map((field) => (
                                             <div key={field} className="col-md-6">
                                                 <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
                                                 <input type="number" name={field} value={newAttendance[field]} onChange={handleChange} className="form-control" required />
                                             </div>
                                         ))}
+
+                                        {/* Total (Read-only) */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Total</label>
+                                            <input type="number" name="total" value={newAttendance.total} readOnly className="form-control" />
+                                        </div>
                                     </div>
 
                                     <div className="d-flex justify-content-end mt-4">

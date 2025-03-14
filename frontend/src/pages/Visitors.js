@@ -3,6 +3,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ReactPaginate from "react-paginate"; // For pagination
 
 const Visitors = () => {
     const [visitors, setVisitors] = useState([]);
@@ -18,7 +19,10 @@ const Visitors = () => {
         would_like_visit: false,
     });
     const [editingVisitor, setEditingVisitor] = useState(null);
-    const [showModal, setShowModal] = useState(false); // State to control modal visibility
+    const [showModal, setShowModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0); // Pagination state
+    const [searchTerm, setSearchTerm] = useState(""); // Search state
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Items per page state
 
     // Fetch visitors from API
     const fetchVisitors = async () => {
@@ -89,6 +93,23 @@ const Visitors = () => {
         setNewVisitor({ firstname: "", lastname: "", phone: "", email: "", address: "", dob: "", gender: "M", want_to_be_member: false, would_like_visit: false });
     };
 
+    // Filter visitors based on search term
+    const filteredVisitors = visitors.filter((visitor) =>
+        `${visitor.firstname} ${visitor.lastname} ${visitor.phone} ${visitor.email}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+    );
+
+    // Pagination logic
+    const offset = currentPage * itemsPerPage;
+    const currentVisitors = filteredVisitors.slice(offset, offset + itemsPerPage);
+    const pageCount = Math.ceil(filteredVisitors.length / itemsPerPage);
+
+    // Handle page change
+    const handlePageChange = ({ selected }) => {
+        setCurrentPage(selected);
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Navbar />
@@ -107,51 +128,104 @@ const Visitors = () => {
                                 Add Visitor
                             </button>
 
+                            {/* Search and Items Per Page */}
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <div className="d-flex align-items-center">
+                                    <label className="me-2">Show</label>
+                                    <select
+                                        className="form-select d-inline w-auto"
+                                        value={itemsPerPage}
+                                        onChange={(e) => {
+                                            setItemsPerPage(parseInt(e.target.value));
+                                            setCurrentPage(0); // Reset to first page
+                                        }}
+                                    >
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <label className="ms-2">entries</label>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="form-control w-auto"
+                                    placeholder="Search visitors..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
                             {/* Visitor List */}
-                            <h3>Visitor List</h3>
-                            <table className="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>S/N</th> {/* Serial Number Column */}
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Phone</th>
-                                        <th>Email</th>
-                                        <th>Address</th>
-                                        <th>DOB</th>
-                                        <th>Gender</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {visitors.map((visitor, index) => (
-                                        <tr key={visitor.id}>
-                                            <td>{index + 1}</td> {/* Serial Number */}
-                                            <td>{visitor.firstname}</td>
-                                            <td>{visitor.lastname}</td>
-                                            <td>{visitor.phone}</td>
-                                            <td>{visitor.email}</td>
-                                            <td>{visitor.address}</td>
-                                            <td>{visitor.dob}</td>
-                                            <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
-                                            <td>
-                                                <button
-                                                    className="btn btn-sm btn-warning me-2"
-                                                    onClick={() => handleEdit(visitor)}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    className="btn btn-sm btn-danger"
-                                                    onClick={() => handleDelete(visitor.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <div className="card mb-4">
+                                <div className="card-header">
+                                    <i className="fas fa-table me-1"></i> Visitors List
+                                </div>
+                                <div className="card-body">
+                                    <table className="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>S/N</th>
+                                                <th>First Name</th>
+                                                <th>Last Name</th>
+                                                <th>Phone</th>
+                                                <th>Email</th>
+                                                <th>Address</th>
+                                                <th>DOB</th>
+                                                <th>Gender</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentVisitors.map((visitor, index) => (
+                                                <tr key={visitor.id}>
+                                                    <td>{offset + index + 1}</td>
+                                                    <td>{visitor.firstname}</td>
+                                                    <td>{visitor.lastname}</td>
+                                                    <td>{visitor.phone}</td>
+                                                    <td>{visitor.email}</td>
+                                                    <td>{visitor.address}</td>
+                                                    <td>{visitor.dob}</td>
+                                                    <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-sm btn-warning me-2"
+                                                            onClick={() => handleEdit(visitor)}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => handleDelete(visitor.id)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    {/* Pagination */}
+                                    <ReactPaginate
+                                        previousLabel={"← Previous"}
+                                        nextLabel={"Next →"}
+                                        pageCount={pageCount}
+                                        onPageChange={handlePageChange}
+                                        containerClassName={"pagination justify-content-end"}
+                                        activeClassName={"active"}
+                                        pageClassName={"page-item"}
+                                        pageLinkClassName={"page-link"}
+                                        previousClassName={"page-item"}
+                                        previousLinkClassName={"page-link"}
+                                        nextClassName={"page-item"}
+                                        nextLinkClassName={"page-link"}
+                                        breakClassName={"page-item"}
+                                        breakLinkClassName={"page-link"}
+                                        disabledClassName={"disabled"}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </main>
                     <Footer />

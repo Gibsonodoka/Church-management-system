@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     members: 0,
-    visitors: 0,
+    visitors: 0, // This will hold the total number of visitors
     inventory: 0,
     departments: 0,
     finance: 0,
@@ -48,7 +48,7 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
-          setStats(response.data);
+          setStats(response.data); // Update stats, including visitors count
         })
         .catch((error) => {
           console.error("Error fetching dashboard stats:", error);
@@ -65,17 +65,21 @@ const Dashboard = () => {
         .catch((error) => {
           console.error("Error fetching recent visitors:", error);
         });
-        axios
-  .get("http://127.0.0.1:8000/api/visitors/recent", {
-    headers: { Authorization: `Bearer ${token}` },
-  })
-  .then((response) => {
-    console.log("Recent Visitors Data:", response.data); // Debugging
-    setRecentVisitors(response.data);
-  })
-  .catch((error) => {
-    console.error("Error fetching recent visitors:", error);
-  });
+
+      // Fetch total visitors count (if not included in dashboard-stats)
+      axios
+        .get("http://127.0.0.1:8000/api/visitors/count", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          setStats((prevStats) => ({
+            ...prevStats,
+            visitors: response.data.totalVisitors, // Update visitors count
+          }));
+        })
+        .catch((error) => {
+          console.error("Error fetching total visitors count:", error);
+        });
     }
   }, [navigate]);
 

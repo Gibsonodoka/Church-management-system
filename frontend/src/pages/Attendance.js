@@ -3,14 +3,16 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import ReactPaginate from "react-paginate"; // For pagination
+import ImportExport from "../components/Attendance/ImportExport";
+import Modal from "../components/Attendance/Modal";
+import Table from "../components/Attendance/Table";
 
 const Attendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
     const [newAttendance, setNewAttendance] = useState({
         date: "",
-        month: "January", // Default month
-        service_description: "Sunday Service", // Default service
+        month: "January",
+        service_description: "Sunday Service",
         men: "",
         women: "",
         youth: "",
@@ -20,9 +22,9 @@ const Attendance = () => {
     });
     const [editingRecord, setEditingRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(0); // Pagination state
-    const [searchTerm, setSearchTerm] = useState(""); // Search state
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Items per page state
+    const [currentPage, setCurrentPage] = useState(0);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Fetch attendance records from API
     const fetchAttendance = async () => {
@@ -65,7 +67,6 @@ const Attendance = () => {
     // Add or update attendance record
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Submitting data:", newAttendance); // Debugging
         try {
             const formattedData = {
                 ...newAttendance,
@@ -82,8 +83,8 @@ const Attendance = () => {
             }
             setNewAttendance({
                 date: "",
-                month: "January", // Reset to default month
-                service_description: "Sunday Service", // Reset to default service
+                month: "January",
+                service_description: "Sunday Service",
                 men: "",
                 women: "",
                 youth: "",
@@ -131,8 +132,8 @@ const Attendance = () => {
         setEditingRecord(null);
         setNewAttendance({
             date: "",
-            month: "January", // Reset to default month
-            service_description: "Sunday Service", // Reset to default service
+            month: "January",
+            service_description: "Sunday Service",
             men: "",
             women: "",
             youth: "",
@@ -171,18 +172,11 @@ const Attendance = () => {
                         <div className="container-fluid px-4">
                             <h1 className="mt-4">Attendance Management</h1>
 
+                            {/* Add Import/Export Buttons */}
+                            <ImportExport attendanceRecords={attendanceRecords} setAttendanceRecords={setAttendanceRecords} />
+
                             {/* Button to Open Add Attendance Modal */}
-                            <button
-                                className="btn btn-primary mb-3"
-                                onClick={() => {
-                                    setNewAttendance((prev) => ({
-                                        ...prev,
-                                        month: "January", // Set default month
-                                        service_description: "Sunday Service", // Set default service
-                                    }));
-                                    setShowModal(true);
-                                }}
-                            >
+                            <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>
                                 Add Attendance
                             </button>
 
@@ -214,80 +208,15 @@ const Attendance = () => {
                                 />
                             </div>
 
-                            {/* Attendance List Table */}
-                            <div className="card mb-4">
-                                <div className="card-header">
-                                    <i className="fas fa-table me-1"></i> Attendance Records
-                                </div>
-                                <div className="card-body">
-                                    <table className="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>S/N</th>
-                                                <th>Date</th>
-                                                <th>Month</th>
-                                                <th>Service</th>
-                                                <th>Men</th>
-                                                <th>Women</th>
-                                                <th>Youth</th>
-                                                <th>Teens</th>
-                                                <th>Children</th>
-                                                <th>Total</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentRecords.map((record, index) => (
-                                                <tr key={record.id}>
-                                                    <td>{offset + index + 1}</td>
-                                                    <td>{record.date}</td>
-                                                    <td>{record.month}</td>
-                                                    <td>{record.service_description}</td>
-                                                    <td>{record.men}</td>
-                                                    <td>{record.women}</td>
-                                                    <td>{record.youth}</td>
-                                                    <td>{record.teens}</td>
-                                                    <td>{record.children}</td>
-                                                    <td>{record.total}</td>
-                                                    <td>
-                                                        <button
-                                                            className="btn btn-sm btn-warning me-2"
-                                                            onClick={() => handleEdit(record)}
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            className="btn btn-sm btn-danger"
-                                                            onClick={() => handleDelete(record.id)}
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-
-                                    {/* Pagination */}
-                                    <ReactPaginate
-                                        previousLabel={"← Previous"}
-                                        nextLabel={"Next →"}
-                                        pageCount={pageCount}
-                                        onPageChange={handlePageChange}
-                                        containerClassName={"pagination justify-content-end"}
-                                        activeClassName={"active"}
-                                        pageClassName={"page-item"}
-                                        pageLinkClassName={"page-link"}
-                                        previousClassName={"page-item"}
-                                        previousLinkClassName={"page-link"}
-                                        nextClassName={"page-item"}
-                                        nextLinkClassName={"page-link"}
-                                        breakClassName={"page-item"}
-                                        breakLinkClassName={"page-link"}
-                                        disabledClassName={"disabled"}
-                                    />
-                                </div>
-                            </div>
+                            {/* Attendance Table */}
+                            <Table
+                                currentRecords={currentRecords}
+                                offset={offset}
+                                handleEdit={handleEdit}
+                                handleDelete={handleDelete}
+                                pageCount={pageCount}
+                                handlePageChange={handlePageChange}
+                            />
                         </div>
                     </main>
                     <Footer />
@@ -295,74 +224,14 @@ const Attendance = () => {
             </div>
 
             {/* Modal for Add/Edit Attendance */}
-            {showModal && (
-                <div className="modal show d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">
-                                    {editingRecord ? "Edit Attendance" : "Add Attendance"}
-                                </h5>
-                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-                            </div>
-                            <div className="modal-body">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="row g-3">
-                                        {/* Date */}
-                                        <div className="col-md-6">
-                                            <label className="form-label">Date</label>
-                                            <input type="date" name="date" value={newAttendance.date} onChange={handleChange} className="form-control" required />
-                                        </div>
-
-                                        {/* Month */}
-                                        <div className="col-md-6">
-                                            <label className="form-label">Month</label>
-                                            <select name="month" value={newAttendance.month} onChange={handleChange} className="form-control" required>
-                                                {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map((m) => (
-                                                    <option key={m} value={m}>{m}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        {/* Service */}
-                                        <div className="col-md-6">
-                                            <label className="form-label">Service Description</label>
-                                            <select name="service_description" value={newAttendance.service_description} onChange={handleChange} className="form-control" required>
-                                                {["Sunday Service", "Midweek Service", "Night Vigil", "Prayer Rain", "Others"].map((s) => (
-                                                    <option key={s} value={s}>{s}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        {/* Attendance Inputs */}
-                                        {["men", "women", "youth", "teens", "children"].map((field) => (
-                                            <div key={field} className="col-md-6">
-                                                <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                                                <input type="number" name={field} value={newAttendance[field]} onChange={handleChange} className="form-control" required />
-                                            </div>
-                                        ))}
-
-                                        {/* Total (Read-only) */}
-                                        <div className="col-md-6">
-                                            <label className="form-label">Total</label>
-                                            <input type="number" name="total" value={newAttendance.total} readOnly className="form-control" />
-                                        </div>
-                                    </div>
-
-                                    <div className="d-flex justify-content-end mt-4">
-                                        <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>
-                                            Close
-                                        </button>
-                                        <button type="submit" className="btn btn-primary">
-                                            {editingRecord ? "Update" : "Add"} Attendance
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <Modal
+                showModal={showModal}
+                handleCloseModal={handleCloseModal}
+                newAttendance={newAttendance}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                editingRecord={editingRecord}
+            />
         </div>
     );
 };

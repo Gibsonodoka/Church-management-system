@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VisitorController;
+use App\Http\Controllers\AttendanceController;
 
 
 
@@ -16,6 +17,7 @@ use App\Http\Controllers\VisitorController;
 | API Routes
 |--------------------------------------------------------------------------
 */
+Route::apiResource('attendance', AttendanceController::class);
 Route::get('/visitors/recent', [VisitorController::class, 'recent']);
 
 Route::get('/visitors', [VisitorController::class, 'index']); // Fetch all visitors

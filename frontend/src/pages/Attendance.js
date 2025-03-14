@@ -3,6 +3,7 @@ import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ReactPaginate from "react-paginate"; // For pagination
 
 const Attendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -19,6 +20,9 @@ const Attendance = () => {
     });
     const [editingRecord, setEditingRecord] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0); // Pagination state
+    const [searchTerm, setSearchTerm] = useState(""); // Search state
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Items per page state
 
     // Fetch attendance records from API
     const fetchAttendance = async () => {
@@ -109,6 +113,23 @@ const Attendance = () => {
         });
     };
 
+    // Filter attendance records based on search term
+    const filteredRecords = attendanceRecords.filter((record) =>
+        `${record.date} ${record.month} ${record.service_description}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+    );
+
+    // Pagination logic
+    const offset = currentPage * itemsPerPage;
+    const currentRecords = filteredRecords.slice(offset, offset + itemsPerPage);
+    const pageCount = Math.ceil(filteredRecords.length / itemsPerPage);
+
+    // Handle page change
+    const handlePageChange = ({ selected }) => {
+        setCurrentPage(selected);
+    };
+
     return (
         <div className="sb-nav-fixed">
             <Navbar />
@@ -126,49 +147,108 @@ const Attendance = () => {
                                 Add Attendance
                             </button>
 
+                            {/* Search and Items Per Page */}
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <div className="d-flex align-items-center">
+                                    <label className="me-2">Show</label>
+                                    <select
+                                        className="form-select d-inline w-auto"
+                                        value={itemsPerPage}
+                                        onChange={(e) => {
+                                            setItemsPerPage(parseInt(e.target.value));
+                                            setCurrentPage(0); // Reset to first page
+                                        }}
+                                    >
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                    </select>
+                                    <label className="ms-2">entries</label>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="form-control w-auto"
+                                    placeholder="Search attendance..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+
                             {/* Attendance List Table */}
-                            <h3>Attendance Records</h3>
-                            <table className="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>S/N</th>
-                                        <th>Date</th>
-                                        <th>Month</th>
-                                        <th>Service</th>
-                                        <th>Men</th>
-                                        <th>Women</th>
-                                        <th>Youth</th>
-                                        <th>Teens</th>
-                                        <th>Children</th>
-                                        <th>Total</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {attendanceRecords.map((record, index) => (
-                                        <tr key={record.id}>
-                                            <td>{index + 1}</td>
-                                            <td>{record.date}</td>
-                                            <td>{record.month}</td>
-                                            <td>{record.service_description}</td>
-                                            <td>{record.men}</td>
-                                            <td>{record.women}</td>
-                                            <td>{record.youth}</td>
-                                            <td>{record.teens}</td>
-                                            <td>{record.children}</td>
-                                            <td>{record.total}</td>
-                                            <td>
-                                                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(record)}>
-                                                    Edit
-                                                </button>
-                                                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(record.id)}>
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                            <div className="card mb-4">
+                                <div className="card-header">
+                                    <i className="fas fa-table me-1"></i> Attendance Records
+                                </div>
+                                <div className="card-body">
+                                    <table className="table table-bordered table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>S/N</th>
+                                                <th>Date</th>
+                                                <th>Month</th>
+                                                <th>Service</th>
+                                                <th>Men</th>
+                                                <th>Women</th>
+                                                <th>Youth</th>
+                                                <th>Teens</th>
+                                                <th>Children</th>
+                                                <th>Total</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentRecords.map((record, index) => (
+                                                <tr key={record.id}>
+                                                    <td>{offset + index + 1}</td>
+                                                    <td>{record.date}</td>
+                                                    <td>{record.month}</td>
+                                                    <td>{record.service_description}</td>
+                                                    <td>{record.men}</td>
+                                                    <td>{record.women}</td>
+                                                    <td>{record.youth}</td>
+                                                    <td>{record.teens}</td>
+                                                    <td>{record.children}</td>
+                                                    <td>{record.total}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-sm btn-warning me-2"
+                                                            onClick={() => handleEdit(record)}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => handleDelete(record.id)}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+
+                                    {/* Pagination */}
+                                    <ReactPaginate
+                                        previousLabel={"← Previous"}
+                                        nextLabel={"Next →"}
+                                        pageCount={pageCount}
+                                        onPageChange={handlePageChange}
+                                        containerClassName={"pagination justify-content-end"}
+                                        activeClassName={"active"}
+                                        pageClassName={"page-item"}
+                                        pageLinkClassName={"page-link"}
+                                        previousClassName={"page-item"}
+                                        previousLinkClassName={"page-link"}
+                                        nextClassName={"page-item"}
+                                        nextLinkClassName={"page-link"}
+                                        breakClassName={"page-item"}
+                                        breakLinkClassName={"page-link"}
+                                        disabledClassName={"disabled"}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </main>
                     <Footer />
@@ -224,7 +304,14 @@ const Attendance = () => {
                                         ))}
                                     </div>
 
-                                    <button type="submit" className="btn btn-primary mt-3">Save Attendance</button>
+                                    <div className="d-flex justify-content-end mt-4">
+                                        <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>
+                                            Close
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            {editingRecord ? "Update" : "Add"} Attendance
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </div>

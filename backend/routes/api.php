@@ -16,7 +16,7 @@ use App\Http\Controllers\VisitorController;
 | API Routes
 |--------------------------------------------------------------------------
 */
-
+Route::get('/visitors/recent', [VisitorController::class, 'recent']);
 
 Route::get('/visitors', [VisitorController::class, 'index']); // Fetch all visitors
 Route::post('/visitors', [VisitorController::class, 'store']); // Add a new visitor

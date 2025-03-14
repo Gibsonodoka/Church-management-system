@@ -7,6 +7,14 @@ use Illuminate\Http\Request;
 
 class VisitorController extends Controller
 {
+        public function recent()
+    {
+        // Fetch the 5 most recent visitors, ordered by creation date
+        $recentVisitors = Visitor::orderBy('created_at', 'desc')->take(5)->get();
+
+        // Return the data as JSON
+        return response()->json($recentVisitors);
+    }
     // Fetch all visitors
     public function index()
     {

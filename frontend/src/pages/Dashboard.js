@@ -21,6 +21,7 @@ const Dashboard = () => {
     daughterChurches: 0,
     attendance: 0,
   });
+  const [recentVisitors, setRecentVisitors] = useState([]); // State for recent visitors
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,6 +29,7 @@ const Dashboard = () => {
     if (!token) {
       navigate("/login");
     } else {
+      // Fetch user data
       axios
         .get("http://127.0.0.1:8000/api/user", {
           headers: { Authorization: `Bearer ${token}` },
@@ -40,6 +42,7 @@ const Dashboard = () => {
           navigate("/login");
         });
 
+      // Fetch dashboard stats
       axios
         .get("http://127.0.0.1:8000/api/dashboard-stats", {
           headers: { Authorization: `Bearer ${token}` },
@@ -50,6 +53,29 @@ const Dashboard = () => {
         .catch((error) => {
           console.error("Error fetching dashboard stats:", error);
         });
+
+      // Fetch recent visitors
+      axios
+        .get("http://127.0.0.1:8000/api/visitors/recent", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          setRecentVisitors(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching recent visitors:", error);
+        });
+        axios
+  .get("http://127.0.0.1:8000/api/visitors/recent", {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  .then((response) => {
+    console.log("Recent Visitors Data:", response.data); // Debugging
+    setRecentVisitors(response.data);
+  })
+  .catch((error) => {
+    console.error("Error fetching recent visitors:", error);
+  });
     }
   }, [navigate]);
 
@@ -156,7 +182,14 @@ const Dashboard = () => {
                 </div>
 
                 <div className="col-xl-6">
-                  <VisitorsTable />
+                  <div className="card mb-4">
+                    <div className="card-header">
+                      <i className="fas fa-table me-1"></i> Recent Visitors
+                    </div>
+                    <div className="card-body">
+                      <VisitorsTable visitors={recentVisitors} /> {/* Pass recent visitors data */}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -13,7 +13,7 @@ const Visitors = () => {
         phone: "",
         email: "",
         address: "",
-        dob: "",
+        dob: "", // DOB field (hidden in table)
         gender: "M",
         want_to_be_member: false,
         would_like_visit: false,
@@ -171,7 +171,6 @@ const Visitors = () => {
                                                 <th>Phone</th>
                                                 <th>Email</th>
                                                 <th>Address</th>
-                                                <th>DOB</th>
                                                 <th>Gender</th>
                                                 <th>Actions</th>
                                             </tr>
@@ -185,7 +184,6 @@ const Visitors = () => {
                                                     <td>{visitor.phone}</td>
                                                     <td>{visitor.email}</td>
                                                     <td>{visitor.address}</td>
-                                                    <td>{visitor.dob}</td>
                                                     <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
                                                     <td>
                                                         <button

@@ -112,7 +112,7 @@ const Visitors = () => {
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>ID</th> {/* Added ID Column */}
+                                        <th>S/N</th> {/* Serial Number Column */}
                                         <th>First Name</th>
                                         <th>Last Name</th>
                                         <th>Phone</th>
@@ -124,9 +124,9 @@ const Visitors = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {visitors.map((visitor) => (
+                                    {visitors.map((visitor, index) => (
                                         <tr key={visitor.id}>
-                                            <td>{visitor.id}</td> {/* Display Visitor ID */}
+                                            <td>{index + 1}</td> {/* Serial Number */}
                                             <td>{visitor.firstname}</td>
                                             <td>{visitor.lastname}</td>
                                             <td>{visitor.phone}</td>

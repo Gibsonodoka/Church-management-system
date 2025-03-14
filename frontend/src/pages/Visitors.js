@@ -10,11 +10,15 @@ const Visitors = () => {
         firstname: "",
         lastname: "",
         phone: "",
+        email: "",
+        address: "",
+        dob: "",
         gender: "M",
         want_to_be_member: false,
         would_like_visit: false,
     });
     const [editingVisitor, setEditingVisitor] = useState(null);
+    const [showModal, setShowModal] = useState(false); // State to control modal visibility
 
     // Fetch visitors from API
     const fetchVisitors = async () => {
@@ -51,7 +55,8 @@ const Visitors = () => {
                 // Create new visitor
                 await axios.post("http://127.0.0.1:8000/api/visitors", newVisitor);
             }
-            setNewVisitor({ firstname: "", lastname: "", phone: "", gender: "M", want_to_be_member: false, would_like_visit: false });
+            setNewVisitor({ firstname: "", lastname: "", phone: "", email: "", address: "", dob: "", gender: "M", want_to_be_member: false, would_like_visit: false });
+            setShowModal(false); // Close modal after submission
             fetchVisitors();
         } catch (error) {
             console.error("Error saving visitor:", error);
@@ -62,6 +67,7 @@ const Visitors = () => {
     const handleEdit = (visitor) => {
         setEditingVisitor(visitor);
         setNewVisitor(visitor);
+        setShowModal(true); // Open modal for editing
     };
 
     // Delete visitor
@@ -74,6 +80,13 @@ const Visitors = () => {
                 console.error("Error deleting visitor:", error);
             }
         }
+    };
+
+    // Reset form and close modal
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingVisitor(null);
+        setNewVisitor({ firstname: "", lastname: "", phone: "", email: "", address: "", dob: "", gender: "M", want_to_be_member: false, would_like_visit: false });
     };
 
     return (
@@ -89,93 +102,23 @@ const Visitors = () => {
                         <div className="container-fluid px-4">
                             <h1 className="mt-4">Visitors Management</h1>
 
-                            {/* Visitor Form */}
-                            <form onSubmit={handleSubmit} className="mb-4">
-                                <div className="row g-3">
-                                    <div className="col-md-4">
-                                        <input
-                                            type="text"
-                                            name="firstname"
-                                            value={newVisitor.firstname}
-                                            onChange={handleChange}
-                                            placeholder="First Name"
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <input
-                                            type="text"
-                                            name="lastname"
-                                            value={newVisitor.lastname}
-                                            onChange={handleChange}
-                                            placeholder="Last Name"
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <input
-                                            type="text"
-                                            name="phone"
-                                            value={newVisitor.phone}
-                                            onChange={handleChange}
-                                            placeholder="Phone Number"
-                                            className="form-control"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-4">
-                                        <select
-                                            name="gender"
-                                            value={newVisitor.gender}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                            required
-                                        >
-                                            <option value="M">Male</option>
-                                            <option value="F">Female</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-check-label">
-                                            <input
-                                                type="checkbox"
-                                                name="want_to_be_member"
-                                                checked={newVisitor.want_to_be_member}
-                                                onChange={handleChange}
-                                                className="form-check-input"
-                                            />
-                                            Want to be a member?
-                                        </label>
-                                    </div>
-                                    <div className="col-md-4">
-                                        <label className="form-check-label">
-                                            <input
-                                                type="checkbox"
-                                                name="would_like_visit"
-                                                checked={newVisitor.would_like_visit}
-                                                onChange={handleChange}
-                                                className="form-check-input"
-                                            />
-                                            Would like a visit?
-                                        </label>
-                                    </div>
-                                    <div className="col-md-12">
-                                        <button type="submit" className="btn btn-primary">
-                                            {editingVisitor ? "Update" : "Add"} Visitor
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
+                            {/* Button to Open Add Visitor Modal */}
+                            <button className="btn btn-primary mb-3" onClick={() => setShowModal(true)}>
+                                Add Visitor
+                            </button>
 
                             {/* Visitor List */}
                             <h3>Visitor List</h3>
                             <table className="table table-bordered">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
+                                        <th>ID</th> {/* Added ID Column */}
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
                                         <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Address</th>
+                                        <th>DOB</th>
                                         <th>Gender</th>
                                         <th>Actions</th>
                                     </tr>
@@ -183,8 +126,13 @@ const Visitors = () => {
                                 <tbody>
                                     {visitors.map((visitor) => (
                                         <tr key={visitor.id}>
-                                            <td>{visitor.firstname} {visitor.lastname}</td>
+                                            <td>{visitor.id}</td> {/* Display Visitor ID */}
+                                            <td>{visitor.firstname}</td>
+                                            <td>{visitor.lastname}</td>
                                             <td>{visitor.phone}</td>
+                                            <td>{visitor.email}</td>
+                                            <td>{visitor.address}</td>
+                                            <td>{visitor.dob}</td>
                                             <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
                                             <td>
                                                 <button
@@ -209,6 +157,161 @@ const Visitors = () => {
                     <Footer />
                 </div>
             </div>
+
+            {/* Modal for Add/Edit Visitor */}
+            {showModal && (
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {editingVisitor ? "Edit Visitor" : "Add Visitor"}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+                            </div>
+                            <div className="modal-body">
+                                <form onSubmit={handleSubmit}>
+                                    <div className="row g-3">
+                                        {/* First Name */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">First Name</label>
+                                            <input
+                                                type="text"
+                                                name="firstname"
+                                                value={newVisitor.firstname}
+                                                onChange={handleChange}
+                                                placeholder="First Name"
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Last Name */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Last Name</label>
+                                            <input
+                                                type="text"
+                                                name="lastname"
+                                                value={newVisitor.lastname}
+                                                onChange={handleChange}
+                                                placeholder="Last Name"
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Email */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Email</label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={newVisitor.email}
+                                                onChange={handleChange}
+                                                placeholder="Email"
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Phone */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Phone</label>
+                                            <input
+                                                type="text"
+                                                name="phone"
+                                                value={newVisitor.phone}
+                                                onChange={handleChange}
+                                                placeholder="Phone"
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Address */}
+                                        <div className="col-md-12">
+                                            <label className="form-label">Address</label>
+                                            <input
+                                                type="text"
+                                                name="address"
+                                                value={newVisitor.address}
+                                                onChange={handleChange}
+                                                placeholder="Address"
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Date of Birth */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Date of Birth</label>
+                                            <input
+                                                type="date"
+                                                name="dob"
+                                                value={newVisitor.dob}
+                                                onChange={handleChange}
+                                                className="form-control"
+                                                required
+                                            />
+                                        </div>
+
+                                        {/* Gender */}
+                                        <div className="col-md-6">
+                                            <label className="form-label">Gender</label>
+                                            <select
+                                                name="gender"
+                                                value={newVisitor.gender}
+                                                onChange={handleChange}
+                                                className="form-control"
+                                                required
+                                            >
+                                                <option value="M">Male</option>
+                                                <option value="F">Female</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Checkboxes */}
+                                        <div className="col-md-6">
+                                            <label className="form-check-label">
+                                                <input
+                                                    type="checkbox"
+                                                    name="want_to_be_member"
+                                                    checked={newVisitor.want_to_be_member}
+                                                    onChange={handleChange}
+                                                    className="form-check-input"
+                                                />
+                                                Want to be a member?
+                                            </label>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-check-label">
+                                                <input
+                                                    type="checkbox"
+                                                    name="would_like_visit"
+                                                    checked={newVisitor.would_like_visit}
+                                                    onChange={handleChange}
+                                                    className="form-check-input"
+                                                />
+                                                Would like a visit?
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Form Buttons */}
+                                    <div className="d-flex justify-content-end mt-4">
+                                        <button type="button" className="btn btn-secondary me-2" onClick={handleCloseModal}>
+                                            Close
+                                        </button>
+                                        <button type="submit" className="btn btn-primary">
+                                            {editingVisitor ? "Update" : "Add"} Visitor
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

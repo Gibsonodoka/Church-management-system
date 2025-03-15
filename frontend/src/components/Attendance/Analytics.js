@@ -17,8 +17,17 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const Analytics = ({ attendanceRecords }) => {
-    const [selectedMonth, setSelectedMonth] = useState("");
-    const [selectedService, setSelectedService] = useState("");
+    // State for filters
+    const [selectedMonth, setSelectedMonth] = useState(""); // For bar and pie charts
+    const [selectedService, setSelectedService] = useState(""); // For bar and pie charts
+    const [progressBarMonth, setProgressBarMonth] = useState(""); // For progress bar chart
+    const [progressBarService, setProgressBarService] = useState(""); // For progress bar chart
+
+    // Get unique months from attendance records
+    const uniqueMonths = [...new Set(attendanceRecords.map((record) => moment(record.date).format("MMMM YYYY")))];
+
+    // Get unique service types from attendance records
+    const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
 
     // Helper function to group data by week for a specific month
     const groupByWeek = (data, month) => {
@@ -39,12 +48,6 @@ const Analytics = ({ attendanceRecords }) => {
         return grouped;
     };
 
-    // Get unique months from attendance records
-    const uniqueMonths = [...new Set(attendanceRecords.map((record) => moment(record.date).format("MMMM YYYY")))];
-
-    // Get unique service types from attendance records
-    const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
-
     // Helper function to calculate monthly attendance for each demographic
     const getMonthlyAttendance = (month, service) => {
         const filteredRecords = attendanceRecords.filter((record) => {
@@ -62,7 +65,7 @@ const Analytics = ({ attendanceRecords }) => {
 
     // Helper function to calculate the monthly target based on service type
     const getMonthlyTarget = (service) => {
-        return service === "Sunday Service" ? 2000 : 800;
+        return service === "Sunday Service" ? 1000 : 500; // Updated targets
     };
 
     // Data for the horizontal progress bar chart
@@ -71,13 +74,13 @@ const Analytics = ({ attendanceRecords }) => {
         datasets: [
             {
                 label: "Current Attendance",
-                data: getMonthlyAttendance(selectedMonth, selectedService), // Actual attendance
+                data: getMonthlyAttendance(progressBarMonth, progressBarService), // Actual attendance
                 backgroundColor: "rgba(75, 192, 192, 0.6)",
             },
             {
                 label: "Remaining to Target",
-                data: getMonthlyAttendance(selectedMonth, selectedService).map(
-                    (attendance) => getMonthlyTarget(selectedService) - attendance
+                data: getMonthlyAttendance(progressBarMonth, progressBarService).map(
+                    (attendance) => getMonthlyTarget(progressBarService) - attendance
                 ), // Remaining to target
                 backgroundColor: "rgba(255, 99, 132, 0.6)",
             },
@@ -287,8 +290,8 @@ const Analytics = ({ attendanceRecords }) => {
                                 {/* Month Dropdown */}
                                 <select
                                     className="form-select"
-                                    value={selectedMonth}
-                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                    value={progressBarMonth}
+                                    onChange={(e) => setProgressBarMonth(e.target.value)}
                                 >
                                     <option value="">Select Month</option>
                                     {uniqueMonths.map((month) => (
@@ -301,8 +304,8 @@ const Analytics = ({ attendanceRecords }) => {
                                 {/* Service Type Dropdown */}
                                 <select
                                     className="form-select"
-                                    value={selectedService}
-                                    onChange={(e) => setSelectedService(e.target.value)}
+                                    value={progressBarService}
+                                    onChange={(e) => setProgressBarService(e.target.value)}
                                 >
                                     <option value="">All Services</option>
                                     {uniqueServices.map((service) => (
@@ -324,7 +327,7 @@ const Analytics = ({ attendanceRecords }) => {
                                         x: {
                                             stacked: true, // Stacked bars
                                             beginAtZero: true,
-                                            max: getMonthlyTarget(selectedService), // Set max value to target
+                                            max: getMonthlyTarget(progressBarService), // Set max value to target
                                         },
                                         y: {
                                             stacked: true, // Stacked bars

@@ -1,6 +1,8 @@
 import React from "react";
 import { Bar, Line } from "react-chartjs-2";
 import moment from "moment";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChartLine, faChartBar } from "@fortawesome/free-solid-svg-icons";
 
 const Analytics = ({ attendanceRecords }) => {
     // Helper function to group data by month
@@ -83,34 +85,59 @@ const Analytics = ({ attendanceRecords }) => {
         <div className="mt-5">
             <h2>Attendance Analytics</h2>
 
-            {/* Line Chart: Total Attendance Over Time */}
-            <div className="mb-5">
-                <h4>Total Attendance Over Time</h4>
-                <Line
-                    data={lineChartData}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                            },
-                        },
-                    }}
-                />
-            </div>
+            {/* Two-column layout for charts */}
+            <div className="row">
+                {/* Line Chart: Total Attendance Over Time */}
+                <div className="col-md-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <h4 className="card-title" style={{ fontSize: "1.2rem" }}>
+                                <FontAwesomeIcon icon={faChartLine} className="me-2" />
+                                Total Attendance Over Time
+                            </h4>
+                        </div>
+                        <div className="card-body" style={{ height: "300px" }}>
+                            <Line
+                                data={lineChartData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
 
-            {/* Bar Chart: Demographic Breakdown */}
-            <div className="mb-5">
-                <h4>Demographic Breakdown</h4>
-                <Bar
-                    data={barChartData}
-                    options={{
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                            },
-                        },
-                    }}
-                />
+                {/* Bar Chart: Demographic Breakdown */}
+                <div className="col-md-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <h4 className="card-title" style={{ fontSize: "1.2rem" }}>
+                                <FontAwesomeIcon icon={faChartBar} className="me-2" />
+                                Demographic Breakdown
+                            </h4>
+                        </div>
+                        <div className="card-body" style={{ height: "300px" }}>
+                            <Bar
+                                data={barChartData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true,
+                                        },
+                                    },
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

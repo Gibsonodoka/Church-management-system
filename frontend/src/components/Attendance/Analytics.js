@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,17 +17,25 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const Analytics = ({ attendanceRecords }) => {
-    // State for filters
-    const [selectedMonth, setSelectedMonth] = useState(""); // For bar and pie charts
-    const [selectedService, setSelectedService] = useState(""); // For bar and pie charts
-    const [progressBarMonth, setProgressBarMonth] = useState(""); // For progress bar chart
-    const [progressBarService, setProgressBarService] = useState(""); // For progress bar chart
-
     // Get unique months from attendance records
     const uniqueMonths = [...new Set(attendanceRecords.map((record) => moment(record.date).format("MMMM YYYY")))];
 
     // Get unique service types from attendance records
     const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
+
+    // State for filters with default values
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedService, setSelectedService] = useState("");
+    const [progressBarMonth, setProgressBarMonth] = useState("");
+    const [progressBarService, setProgressBarService] = useState("");
+
+    // Set default values for selectedMonth and progressBarMonth when uniqueMonths is available
+    useEffect(() => {
+        if (uniqueMonths.length > 0) {
+            setSelectedMonth(uniqueMonths[0]);
+            setProgressBarMonth(uniqueMonths[0]);
+        }
+    }, [uniqueMonths]);
 
     // Helper function to group data by week for a specific month
     const groupByWeek = (data, month) => {

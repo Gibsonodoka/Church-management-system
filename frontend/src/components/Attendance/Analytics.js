@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Bar, Pie } from "react-chartjs-2"; // Add Pie chart
-import GaugeChart from "react-gauge-chart"; // Add Speedometer chart
+import { Bar, Pie } from "react-chartjs-2";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartBar, faChartPie, faTachometerAlt } from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +10,7 @@ import {
     LinearScale,
     Tooltip,
     Legend,
-    ArcElement, // Required for Pie chart
+    ArcElement,
 } from "chart.js";
 
 // Register required Chart.js components
@@ -45,6 +44,45 @@ const Analytics = ({ attendanceRecords }) => {
 
     // Get unique service types from attendance records
     const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
+
+    // Helper function to calculate monthly attendance for each demographic
+    const getMonthlyAttendance = (month, service) => {
+        const filteredRecords = attendanceRecords.filter((record) => {
+            const recordMonth = moment(record.date).format("MMMM YYYY");
+            const matchesMonth = month ? recordMonth === month : true;
+            const matchesService = service ? record.service_description === service : true;
+            return matchesMonth && matchesService;
+        });
+
+        const demographics = ["men", "women", "youth", "teens", "children"];
+        return demographics.map((category) =>
+            filteredRecords.reduce((sum, record) => sum + (parseInt(record[category]) || 0), 0)
+        );
+    };
+
+    // Helper function to calculate the monthly target based on service type
+    const getMonthlyTarget = (service) => {
+        return service === "Sunday Service" ? 2000 : 800;
+    };
+
+    // Data for the horizontal progress bar chart
+    const progressBarData = {
+        labels: ["Men", "Women", "Youth", "Teens", "Children"],
+        datasets: [
+            {
+                label: "Current Attendance",
+                data: getMonthlyAttendance(selectedMonth, selectedService), // Actual attendance
+                backgroundColor: "rgba(75, 192, 192, 0.6)",
+            },
+            {
+                label: "Remaining to Target",
+                data: getMonthlyAttendance(selectedMonth, selectedService).map(
+                    (attendance) => getMonthlyTarget(selectedService) - attendance
+                ), // Remaining to target
+                backgroundColor: "rgba(255, 99, 132, 0.6)",
+            },
+        ],
+    };
 
     // Filter data for the "Total Attendance Per Week" chart based on selected month and service
     const filteredDataForBarChart = attendanceRecords.filter((record) => {
@@ -135,11 +173,6 @@ const Analytics = ({ attendanceRecords }) => {
         ],
     };
 
-    // Calculate attendance rate for the speedometer chart
-    const totalAttendance = attendanceRecords.reduce((sum, record) => sum + (parseInt(record.total) || 0), 0);
-    const targetAttendance = 1000; // Example target (you can adjust this)
-    const attendanceRate = totalAttendance / targetAttendance;
-
     return (
         <div className="mt-5">
             <h2>Attendance Analytics</h2>
@@ -219,7 +252,7 @@ const Analytics = ({ attendanceRecords }) => {
                 </div>
             </div>
 
-            {/* New Row for Pie Chart and Speedometer Chart */}
+            {/* New Row for Pie Chart and Progress Bar Chart */}
             <div className="row">
                 {/* Pie Chart: Attendance Per Month by Demographic */}
                 <div className="col-md-6">
@@ -242,27 +275,62 @@ const Analytics = ({ attendanceRecords }) => {
                     </div>
                 </div>
 
-                {/* Speedometer Chart: Attendance Rate */}
+                {/* Progress Bar Chart: Monthly Attendance Progress */}
                 <div className="col-md-6">
                     <div className="card mb-4">
                         <div className="card-header">
                             <h4 className="card-title">
                                 <FontAwesomeIcon icon={faTachometerAlt} className="me-2" />
-                                Attendance Rate
+                                Monthly Attendance Progress
                             </h4>
+                            <div className="d-flex gap-3 mt-2">
+                                {/* Month Dropdown */}
+                                <select
+                                    className="form-select"
+                                    value={selectedMonth}
+                                    onChange={(e) => setSelectedMonth(e.target.value)}
+                                >
+                                    <option value="">Select Month</option>
+                                    {uniqueMonths.map((month) => (
+                                        <option key={month} value={month}>
+                                            {month}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                {/* Service Type Dropdown */}
+                                <select
+                                    className="form-select"
+                                    value={selectedService}
+                                    onChange={(e) => setSelectedService(e.target.value)}
+                                >
+                                    <option value="">All Services</option>
+                                    {uniqueServices.map((service) => (
+                                        <option key={service} value={service}>
+                                            {service}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <div className="card-body" style={{ height: "300px" }}>
-                            <GaugeChart
-                                id="attendance-rate-gauge"
-                                percent={attendanceRate}
-                                textColor="#000"
-                                arcPadding={0.02}
-                                cornerRadius={3}
-                                arcsLength={[0.3, 0.5, 0.2]}
-                                colors={["#FF5F6D", "#FFC371", "#4CAF50"]}
-                                needleColor="#464A4E"
-                                needleBaseColor="#464A4E"
-                                animate={false}
+                            <Bar
+                                data={progressBarData}
+                                options={{
+                                    indexAxis: "y", // Horizontal bar chart
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: {
+                                        x: {
+                                            stacked: true, // Stacked bars
+                                            beginAtZero: true,
+                                            max: getMonthlyTarget(selectedService), // Set max value to target
+                                        },
+                                        y: {
+                                            stacked: true, // Stacked bars
+                                        },
+                                    },
+                                }}
                             />
                         </div>
                     </div>

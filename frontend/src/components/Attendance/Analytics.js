@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Bar } from "react-chartjs-2"; // Only Bar chart is needed now
+import { Bar, Pie } from "react-chartjs-2"; // Add Pie chart
+import GaugeChart from "react-gauge-chart"; // Add Speedometer chart
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartLine, faChartBar } from "@fortawesome/free-solid-svg-icons";
+import { faChartBar, faChartPie, faTachometerAlt } from "@fortawesome/free-solid-svg-icons";
 import {
     Chart as ChartJS,
     BarElement,
@@ -10,10 +11,11 @@ import {
     LinearScale,
     Tooltip,
     Legend,
+    ArcElement, // Required for Pie chart
 } from "chart.js";
 
 // Register required Chart.js components
-ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement);
 
 const Analytics = ({ attendanceRecords }) => {
     const [selectedMonth, setSelectedMonth] = useState("");
@@ -44,7 +46,7 @@ const Analytics = ({ attendanceRecords }) => {
     // Get unique service types from attendance records
     const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
 
-    // Filter data for the "Total Attendance Over Time" chart based on selected month and service
+    // Filter data for the "Total Attendance Per Week" chart based on selected month and service
     const filteredDataForBarChart = attendanceRecords.filter((record) => {
         const recordMonth = moment(record.date).format("MMMM YYYY");
         const matchesMonth = selectedMonth ? recordMonth === selectedMonth : true;
@@ -52,7 +54,7 @@ const Analytics = ({ attendanceRecords }) => {
         return matchesMonth && matchesService;
     });
 
-    // Group filtered data by week for the "Total Attendance Over Time" chart
+    // Group filtered data by week for the "Total Attendance Per Week" chart
     const weeklyDataForBarChart = groupByWeek(filteredDataForBarChart, selectedMonth);
     const weeksForBarChart = Object.keys(weeklyDataForBarChart);
     const totalsForBarChart = weeksForBarChart.map((week) => weeklyDataForBarChart[week]);
@@ -109,6 +111,34 @@ const Analytics = ({ attendanceRecords }) => {
             },
         ],
     };
+
+    // Data for the pie chart (attendance per month by demographic)
+    const pieChartData = {
+        labels: ["Men", "Women", "Youth", "Teens", "Children"],
+        datasets: [
+            {
+                data: [
+                    attendanceRecords.reduce((sum, record) => sum + (parseInt(record.men) || 0), 0),
+                    attendanceRecords.reduce((sum, record) => sum + (parseInt(record.women) || 0), 0),
+                    attendanceRecords.reduce((sum, record) => sum + (parseInt(record.youth) || 0), 0),
+                    attendanceRecords.reduce((sum, record) => sum + (parseInt(record.teens) || 0), 0),
+                    attendanceRecords.reduce((sum, record) => sum + (parseInt(record.children) || 0), 0),
+                ],
+                backgroundColor: [
+                    "rgba(54, 162, 235, 0.6)",
+                    "rgba(255, 99, 132, 0.6)",
+                    "rgba(255, 206, 86, 0.6)",
+                    "rgba(75, 192, 192, 0.6)",
+                    "rgba(153, 102, 255, 0.6)",
+                ],
+            },
+        ],
+    };
+
+    // Calculate attendance rate for the speedometer chart
+    const totalAttendance = attendanceRecords.reduce((sum, record) => sum + (parseInt(record.total) || 0), 0);
+    const targetAttendance = 1000; // Example target (you can adjust this)
+    const attendanceRate = totalAttendance / targetAttendance;
 
     return (
         <div className="mt-5">
@@ -183,6 +213,56 @@ const Analytics = ({ attendanceRecords }) => {
                                         },
                                     },
                                 }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* New Row for Pie Chart and Speedometer Chart */}
+            <div className="row">
+                {/* Pie Chart: Attendance Per Month by Demographic */}
+                <div className="col-md-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <h4 className="card-title">
+                                <FontAwesomeIcon icon={faChartPie} className="me-2" />
+                                Attendance Per Month by Demographic
+                            </h4>
+                        </div>
+                        <div className="card-body" style={{ height: "300px" }}>
+                            <Pie
+                                data={pieChartData}
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Speedometer Chart: Attendance Rate */}
+                <div className="col-md-6">
+                    <div className="card mb-4">
+                        <div className="card-header">
+                            <h4 className="card-title">
+                                <FontAwesomeIcon icon={faTachometerAlt} className="me-2" />
+                                Attendance Rate
+                            </h4>
+                        </div>
+                        <div className="card-body" style={{ height: "300px" }}>
+                            <GaugeChart
+                                id="attendance-rate-gauge"
+                                percent={attendanceRate}
+                                textColor="#000"
+                                arcPadding={0.02}
+                                cornerRadius={3}
+                                arcsLength={[0.3, 0.5, 0.2]}
+                                colors={["#FF5F6D", "#FFC371", "#4CAF50"]}
+                                needleColor="#464A4E"
+                                needleBaseColor="#464A4E"
+                                animate={false}
                             />
                         </div>
                     </div>

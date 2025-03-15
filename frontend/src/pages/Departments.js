@@ -16,7 +16,7 @@ const Departments = () => {
   const [user, setUser] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [newDepartment, setNewDepartment] = useState("");
-  const [editId, setEditId] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [editName, setEditName] = useState("");
 
   useEffect(() => {
@@ -57,21 +57,45 @@ const Departments = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (await deleteDepartment(id)) {
-      setDepartments(departments.filter(dep => dep.id !== id));
+  const handleDelete = async () => {
+    if (!selectedDepartment) {
+      alert("Please select a department to delete.");
+      return;
+    }
+    if (await deleteDepartment(selectedDepartment)) {
+      setDepartments(departments.filter(dep => dep.id !== selectedDepartment));
+      setSelectedDepartment("");
+      alert("Department deleted successfully.");
+    } else {
+      alert("Failed to delete department.");
     }
   };
 
   const handleUpdate = async () => {
-    if (!editId || editName.trim() === "") return;
-    const updated = await updateDepartment(editId, editName);
+    if (!selectedDepartment || editName.trim() === "") {
+      alert("Please select a department and enter a new name.");
+      return;
+    }
+    const updated = await updateDepartment(selectedDepartment, editName);
     if (updated) {
-      setDepartments(departments.map(dep => dep.id === editId ? updated : dep));
-      setEditId(null);
+      setDepartments(departments.map(dep => dep.id === selectedDepartment ? updated : dep));
+      setSelectedDepartment("");
       setEditName("");
+      alert("Department updated successfully.");
+    } else {
+      alert("Failed to update department.");
     }
   };
+
+  // Predefined colors for cards
+  const cardColors = [
+    "bg-primary",
+    "bg-success",
+    "bg-info",
+    "bg-warning",
+    "bg-danger",
+    "bg-secondary",
+  ];
 
   return (
     <div className="sb-nav-fixed">
@@ -102,34 +126,64 @@ const Departments = () => {
                 </button>
               </div>
 
-              {/* Departments List */}
-              <div className="grid grid-cols-3 gap-4">
-                {departments.map((dep) => (
-                  <div key={dep.id} className="border p-4 rounded shadow">
-                    {editId === dep.id ? (
-                      <input 
-                        type="text" 
-                        value={editName} 
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="border p-2"
-                      />
-                    ) : (
-                      <h3 className="text-xl font-bold">{dep.name}</h3>
-                    )}
-                    <div className="mt-2">
-                      {editId === dep.id ? (
-                        <button onClick={handleUpdate} className="bg-green-500 text-white px-2 py-1 mr-2">
-                          Save
-                        </button>
-                      ) : (
-                        <button onClick={() => { setEditId(dep.id); setEditName(dep.name); }} 
-                          className="bg-yellow-500 text-white px-2 py-1 mr-2">
-                          Edit
-                        </button>
-                      )}
-                      <button onClick={() => handleDelete(dep.id)} className="bg-red-500 text-white px-2 py-1">
-                        Delete
-                      </button>
+              {/* Dropdown for Edit/Delete Actions */}
+              <div className="mb-4">
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => {
+                    setSelectedDepartment(e.target.value);
+                    const selectedDept = departments.find(dep => dep.id === e.target.value);
+                    setEditName(selectedDept ? selectedDept.name : "");
+                  }}
+                  className="border p-2 mr-2"
+                >
+                  <option value="">Select a Department</option>
+                  {departments.map((dep) => (
+                    <option key={dep.id} value={dep.id}>
+                      {dep.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Enter new name"
+                  className="border p-2 mr-2"
+                  disabled={!selectedDepartment}
+                />
+                <button
+                  onClick={handleUpdate}
+                  className="bg-yellow-500 text-white px-4 py-2 mr-2"
+                  disabled={!selectedDepartment || !editName.trim()}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-500 text-white px-4 py-2"
+                  disabled={!selectedDepartment}
+                >
+                  Delete
+                </button>
+              </div>
+
+              {/* Departments List - Compact Cards with Individual Colors */}
+              <div className="row">
+                {departments.map((dep, index) => (
+                  <div key={dep.id} className="col-xl-2 col-md-3 col-sm-4 col-6 mb-4">
+                    <div className={`card ${cardColors[index % cardColors.length]} text-white`}>
+                      <div className="card-body">
+                        <h5 className="card-title">{dep.name}</h5>
+                        <div className="d-flex align-items-center justify-content-between">
+                          <div>
+                            <h3 className="card-text">
+                              {dep.membersCount || 0} {/* Example: Display number of members */}
+                            </h3>
+                          </div>
+                          <i className="fas fa-building fa-2x"></i>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}

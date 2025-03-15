@@ -24,18 +24,10 @@ const Analytics = ({ attendanceRecords }) => {
     const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
 
     // State for filters with default values
-    const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedMonth, setSelectedMonth] = useState(uniqueMonths[0] || "");
     const [selectedService, setSelectedService] = useState("");
-    const [progressBarMonth, setProgressBarMonth] = useState("");
+    const [progressBarMonth, setProgressBarMonth] = useState(uniqueMonths[0] || "");
     const [progressBarService, setProgressBarService] = useState("");
-
-    // Set default values for selectedMonth and progressBarMonth when uniqueMonths is available
-    useEffect(() => {
-        if (uniqueMonths.length > 0) {
-            setSelectedMonth(uniqueMonths[0]);
-            setProgressBarMonth(uniqueMonths[0]);
-        }
-    }, [uniqueMonths]);
 
     // Helper function to group data by week for a specific month
     const groupByWeek = (data, month) => {

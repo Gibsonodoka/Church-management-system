@@ -6,6 +6,7 @@ import Users from "./pages/Users";
 import Members from "./pages/Members"; // Import Members page
 import Visitors from "./pages/Visitors";
 import Attendance from "./pages/Attendance";
+import Departments from "./pages/Departments";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/members" element={<Members />} /> {/* Added Members page */}
         <Route path="/visitors" element={<Visitors />} />
         <Route path="/attendance" element={<Attendance />} />
+        <Route path="/departments" element={<Departments />} />
       </Routes>
     </Router>
   );

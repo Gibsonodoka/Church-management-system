@@ -8,7 +8,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\AttendanceController;
-
+use App\Http\Controllers\DepartmentController;
 
 
 
@@ -17,6 +17,13 @@ use App\Http\Controllers\AttendanceController;
 | API Routes
 |--------------------------------------------------------------------------
 */
+
+
+Route::get('/departments', [DepartmentController::class, 'index']);
+Route::post('/departments', [DepartmentController::class, 'store']);
+Route::put('/departments/{id}', [DepartmentController::class, 'update']);
+Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
+
 Route::apiResource('attendance', AttendanceController::class);
 Route::get('/visitors/recent', [VisitorController::class, 'recent']);
 

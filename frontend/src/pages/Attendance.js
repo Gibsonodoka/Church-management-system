@@ -6,6 +6,7 @@ import Footer from "../components/Footer";
 import ImportExport from "../components/Attendance/ImportExport";
 import Modal from "../components/Attendance/Modal";
 import Table from "../components/Attendance/Table";
+import Analytics from "../components/Attendance/Analytics";
 
 const Attendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -217,6 +218,8 @@ const Attendance = () => {
                                 pageCount={pageCount}
                                 handlePageChange={handlePageChange}
                             />
+                            {/* Attendance Analytics */}
+                            <Analytics attendanceRecords={attendanceRecords} />
                         </div>
                     </main>
                     <Footer />

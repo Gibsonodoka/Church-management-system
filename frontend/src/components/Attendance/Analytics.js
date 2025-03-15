@@ -1,81 +1,110 @@
-import React from "react";
-import { Bar, Line } from "react-chartjs-2";
+import React, { useState } from "react";
+import { Bar } from "react-chartjs-2"; // Only Bar chart is needed now
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartLine, faChartBar } from "@fortawesome/free-solid-svg-icons";
+import {
+    Chart as ChartJS,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+    Legend,
+} from "chart.js";
+
+// Register required Chart.js components
+ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const Analytics = ({ attendanceRecords }) => {
-    // Helper function to group data by month
-    const groupByMonth = (data) => {
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [selectedService, setSelectedService] = useState("");
+
+    // Helper function to group data by week for a specific month
+    const groupByWeek = (data, month) => {
         const grouped = {};
         data.forEach((record) => {
-            const month = moment(record.date).format("MMMM YYYY");
-            if (!grouped[month]) {
-                grouped[month] = {
-                    total: 0,
-                    men: 0,
-                    women: 0,
-                    youth: 0,
-                    teens: 0,
-                    children: 0,
-                };
+            const recordMonth = moment(record.date).format("MMMM YYYY");
+            if (recordMonth === month) {
+                // Group by week starting on Sunday
+                const weekStart = moment(record.date).startOf("week").format("DD MMM");
+                const weekEnd = moment(record.date).endOf("week").format("DD MMM");
+                const weekLabel = `Week ${moment(record.date).week()} (${weekStart} - ${weekEnd})`;
+                if (!grouped[weekLabel]) {
+                    grouped[weekLabel] = 0;
+                }
+                grouped[weekLabel] += parseInt(record.total) || 0;
             }
-            grouped[month].total += parseInt(record.total);
-            grouped[month].men += parseInt(record.men);
-            grouped[month].women += parseInt(record.women);
-            grouped[month].youth += parseInt(record.youth);
-            grouped[month].teens += parseInt(record.teens);
-            grouped[month].children += parseInt(record.children);
         });
         return grouped;
     };
 
-    // Group attendance data by month
-    const monthlyData = groupByMonth(attendanceRecords);
-    const months = Object.keys(monthlyData);
-    const totals = months.map((month) => monthlyData[month].total);
+    // Get unique months from attendance records
+    const uniqueMonths = [...new Set(attendanceRecords.map((record) => moment(record.date).format("MMMM YYYY")))];
 
-    // Data for the line chart (total attendance over time)
-    const lineChartData = {
-        labels: months,
+    // Get unique service types from attendance records
+    const uniqueServices = [...new Set(attendanceRecords.map((record) => record.service_description))];
+
+    // Filter data for the "Total Attendance Over Time" chart based on selected month and service
+    const filteredDataForBarChart = attendanceRecords.filter((record) => {
+        const recordMonth = moment(record.date).format("MMMM YYYY");
+        const matchesMonth = selectedMonth ? recordMonth === selectedMonth : true;
+        const matchesService = selectedService ? record.service_description === selectedService : true;
+        return matchesMonth && matchesService;
+    });
+
+    // Group filtered data by week for the "Total Attendance Over Time" chart
+    const weeklyDataForBarChart = groupByWeek(filteredDataForBarChart, selectedMonth);
+    const weeksForBarChart = Object.keys(weeklyDataForBarChart);
+    const totalsForBarChart = weeksForBarChart.map((week) => weeklyDataForBarChart[week]);
+
+    // Data for the bar chart (total attendance per week)
+    const barChartData = {
+        labels: weeksForBarChart,
         datasets: [
             {
                 label: "Total Attendance",
-                data: totals,
-                borderColor: "rgba(75, 192, 192, 1)",
-                backgroundColor: "rgba(75, 192, 192, 0.2)",
-                fill: true,
+                data: totalsForBarChart,
+                backgroundColor: "rgba(75, 192, 192, 0.6)",
             },
         ],
     };
 
-    // Data for the bar chart (demographic breakdown)
-    const barChartData = {
-        labels: months,
+    // Function to get total counts for each demographic category
+    const getDemographicData = (category) => {
+        return uniqueMonths.map((month) =>
+            attendanceRecords
+                .filter((record) => moment(record.date).format("MMMM YYYY") === month)
+                .reduce((sum, record) => sum + (parseInt(record[category]) || 0), 0)
+        );
+    };
+
+    // Data for the second bar chart (demographic breakdown)
+    const demographicBarChartData = {
+        labels: uniqueMonths, // Show all months for demographic breakdown
         datasets: [
             {
                 label: "Men",
-                data: months.map((month) => monthlyData[month].men),
+                data: getDemographicData("men"),
                 backgroundColor: "rgba(54, 162, 235, 0.6)",
             },
             {
                 label: "Women",
-                data: months.map((month) => monthlyData[month].women),
+                data: getDemographicData("women"),
                 backgroundColor: "rgba(255, 99, 132, 0.6)",
             },
             {
                 label: "Youth",
-                data: months.map((month) => monthlyData[month].youth),
+                data: getDemographicData("youth"),
                 backgroundColor: "rgba(255, 206, 86, 0.6)",
             },
             {
                 label: "Teens",
-                data: months.map((month) => monthlyData[month].teens),
+                data: getDemographicData("teens"),
                 backgroundColor: "rgba(75, 192, 192, 0.6)",
             },
             {
                 label: "Children",
-                data: months.map((month) => monthlyData[month].children),
+                data: getDemographicData("children"),
                 backgroundColor: "rgba(153, 102, 255, 0.6)",
             },
         ],
@@ -85,20 +114,40 @@ const Analytics = ({ attendanceRecords }) => {
         <div className="mt-5">
             <h2>Attendance Analytics</h2>
 
-            {/* Two-column layout for charts */}
             <div className="row">
-                {/* Line Chart: Total Attendance Over Time */}
+                {/* Bar Chart: Total Attendance Per Week */}
                 <div className="col-md-6">
                     <div className="card mb-4">
                         <div className="card-header">
-                            <h4 className="card-title" style={{ fontSize: "1.2rem" }}>
-                                <FontAwesomeIcon icon={faChartLine} className="me-2" />
-                                Total Attendance Over Time
+                            <h4 className="card-title">
+                                <FontAwesomeIcon icon={faChartBar} className="me-2" />
+                                Total Attendance Per Week
                             </h4>
+                            <div className="d-flex gap-3 mt-2">
+                                {/* Month Dropdown */}
+                                <select className="form-select" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+                                    <option value="">Select Month</option>
+                                    {uniqueMonths.map((month) => (
+                                        <option key={month} value={month}>
+                                            {month}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                {/* Service Type Dropdown */}
+                                <select className="form-select" value={selectedService} onChange={(e) => setSelectedService(e.target.value)}>
+                                    <option value="">All Services</option>
+                                    {uniqueServices.map((service) => (
+                                        <option key={service} value={service}>
+                                            {service}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
                         <div className="card-body" style={{ height: "300px" }}>
-                            <Line
-                                data={lineChartData}
+                            <Bar
+                                data={barChartData}
                                 options={{
                                     responsive: true,
                                     maintainAspectRatio: false,
@@ -117,14 +166,14 @@ const Analytics = ({ attendanceRecords }) => {
                 <div className="col-md-6">
                     <div className="card mb-4">
                         <div className="card-header">
-                            <h4 className="card-title" style={{ fontSize: "1.2rem" }}>
+                            <h4 className="card-title">
                                 <FontAwesomeIcon icon={faChartBar} className="me-2" />
                                 Demographic Breakdown
                             </h4>
                         </div>
                         <div className="card-body" style={{ height: "300px" }}>
                             <Bar
-                                data={barChartData}
+                                data={demographicBarChartData}
                                 options={{
                                     responsive: true,
                                     maintainAspectRatio: false,

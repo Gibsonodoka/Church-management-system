@@ -109,63 +109,36 @@ const Departments = () => {
         <div id="layoutSidenav_content">
           <main>
             <div className="container-fluid px-4">
-              <h1 className="mt-4">Departments</h1>
-              <p>Welcome {user ? user.name : "Loading..."} to Our Church Management System</p>
+              <h1 className="mt-4 text-3xl font-bold text-gray-800">Departments</h1>
+              <p className="text-gray-600 mb-6">Welcome {user ? user.name : "Loading..."} to Our Church Management System</p>
 
               {/* Add Department Form */}
-              <div className="mb-4">
-                <input
-                  type="text"
-                  value={newDepartment}
-                  onChange={(e) => setNewDepartment(e.target.value)}
-                  placeholder="Enter Department Name"
-                  className="border p-2 mr-2"
-                />
-                <button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2">
-                  Create
-                </button>
-              </div>
-
-              {/* Dropdown for Edit/Delete Actions */}
-              <div className="mb-4">
-                <select
-                  value={selectedDepartment}
-                  onChange={(e) => {
-                    setSelectedDepartment(e.target.value);
-                    const selectedDept = departments.find(dep => dep.id === e.target.value);
-                    setEditName(selectedDept ? selectedDept.name : "");
-                  }}
-                  className="border p-2 mr-2"
-                >
-                  <option value="">Select a Department</option>
-                  {departments.map((dep) => (
-                    <option key={dep.id} value={dep.id}>
-                      {dep.name}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Enter new name"
-                  className="border p-2 mr-2"
-                  disabled={!selectedDepartment}
-                />
-                <button
-                  onClick={handleUpdate}
-                  className="bg-yellow-500 text-white px-4 py-2 mr-2"
-                  disabled={!selectedDepartment || !editName.trim()}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="bg-red-500 text-white px-4 py-2"
-                  disabled={!selectedDepartment}
-                >
-                  Delete
-                </button>
+              <div className="mb-4 p-4 bg-white rounded shadow-sm">
+                <h2 className="text-xl font-semibold mb-3">Add New Department</h2>
+                <div className="d-flex gap-2">
+                  <input
+                    type="text"
+                    value={newDepartment}
+                    onChange={(e) => setNewDepartment(e.target.value)}
+                    placeholder="Enter Department Name"
+                    className="form-control"
+                  />
+                  <button
+                    onClick={handleCreate}
+                    className="btn btn-primary"
+                  >
+                    Create
+                  </button>
+                  {/* Action Button to Trigger Modal */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#actionModal"
+                  >
+                    Action
+                  </button>
+                </div>
               </div>
 
               {/* Departments List - Compact Cards with Individual Colors */}
@@ -192,6 +165,69 @@ const Departments = () => {
           </main>
 
           <Footer />
+        </div>
+      </div>
+
+      {/* Bootstrap Modal for Edit/Delete Actions */}
+      <div className="modal fade" id="actionModal" tabIndex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="actionModalLabel">Manage Department</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <select
+                value={selectedDepartment}
+                onChange={(e) => {
+                  setSelectedDepartment(e.target.value);
+                  const selectedDept = departments.find(dep => dep.id === e.target.value);
+                  setEditName(selectedDept ? selectedDept.name : "");
+                }}
+                className="form-select mb-3"
+              >
+                <option value="">Select a Department</option>
+                {departments.map((dep) => (
+                  <option key={dep.id} value={dep.id}>
+                    {dep.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Enter new name"
+                className="form-control mb-3"
+                disabled={!selectedDepartment}
+              />
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-warning"
+                onClick={handleUpdate}
+                disabled={!selectedDepartment || !editName.trim()}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleDelete}
+                disabled={!selectedDepartment}
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

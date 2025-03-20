@@ -1,13 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
-import Users from "./pages/Users";
-import Members from "./pages/Members"; // Import Members page
-import Visitors from "./pages/Visitors";
-import Attendance from "./pages/Attendance";
-import Departments from "./pages/Departments";
-
+import Dashboard from "./pages/admin/Dashboard"; // Updated import
+import Users from "./pages/admin/Users"; // Updated import
+import Members from "./pages/admin/Members"; // Updated import
+import Visitors from "./pages/admin/Visitors"; // Updated import
+import Attendance from "./pages/admin/Attendance"; // Updated import
+import Departments from "./pages/admin/Departments"; // Updated import
 
 function App() {
   return (
@@ -15,14 +14,18 @@ function App() {
       <Routes>
         {/* Redirect "/" to "/login" */}
         <Route path="/" element={<Navigate to="/login" />} />
+
+        {/* Common pages (not role-specific) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/users" element={<Users />} />
-        <Route path="/members" element={<Members />} /> {/* Added Members page */}
-        <Route path="/visitors" element={<Visitors />} />
-        <Route path="/attendance" element={<Attendance />} />
-        <Route path="/departments" element={<Departments />} />
+
+        {/* Admin-specific pages */}
+        <Route path="/admin/dashboard" element={<Dashboard />} /> {/* Updated path */}
+        <Route path="/admin/users" element={<Users />} /> {/* Updated path */}
+        <Route path="/admin/members" element={<Members />} /> {/* Updated path */}
+        <Route path="/admin/visitors" element={<Visitors />} /> {/* Updated path */}
+        <Route path="/admin/attendance" element={<Attendance />} /> {/* Updated path */}
+        <Route path="/admin/departments" element={<Departments />} /> {/* Updated path */}
       </Routes>
     </Router>
   );

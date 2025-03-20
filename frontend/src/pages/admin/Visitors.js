@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
+import Sidebar from "../../components/Sidebar"; // Updated path
+import Navbar from "../../components/Navbar"; // Updated path
+import Footer from "../../components/Footer"; // Updated path
 import ReactPaginate from "react-paginate"; // For pagination
 
 const Visitors = () => {
@@ -31,6 +31,7 @@ const Visitors = () => {
             setVisitors(response.data);
         } catch (error) {
             console.error("Error fetching visitors:", error);
+            alert("Failed to fetch visitors. Please try again.");
         }
     };
 
@@ -47,23 +48,61 @@ const Visitors = () => {
         }));
     };
 
-    // Add or update visitor
+    // Handle form submission (Add or Edit)
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Map "M" to "male" and "F" to "female"
+        const formattedVisitor = {
+            ...newVisitor,
+            gender: newVisitor.gender === "M" ? "male" : "female"
+        };
+
         try {
+            let response;
             if (editingVisitor) {
-                // Update visitor
-                await axios.put(`http://127.0.0.1:8000/api/visitors/${editingVisitor.id}`, newVisitor);
-                setEditingVisitor(null);
+                // If editing, send a PUT request to update the visitor
+                response = await axios.put(
+                    `http://127.0.0.1:8000/api/visitors/${editingVisitor.id}`,
+                    formattedVisitor,
+                    {
+                        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                    }
+                );
+
+                // Update the visitor in the frontend state
+                const updatedVisitors = visitors.map((visitor) =>
+                    visitor.id === editingVisitor.id ? response.data : visitor
+                );
+                setVisitors(updatedVisitors);
             } else {
-                // Create new visitor
-                await axios.post("http://127.0.0.1:8000/api/visitors", newVisitor);
+                // If adding, send a POST request to create a new visitor
+                response = await axios.post(
+                    "http://127.0.0.1:8000/api/visitors",
+                    formattedVisitor,
+                    {
+                        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                    }
+                );
+
+                // Add the new visitor to the frontend state
+                setVisitors([...visitors, response.data]);
             }
-            setNewVisitor({ firstname: "", lastname: "", phone: "", email: "", address: "", dob: "", gender: "M", want_to_be_member: false, would_like_visit: false });
-            setShowModal(false); // Close modal after submission
-            fetchVisitors();
+
+            console.log("API Response:", response.data); // Log the response from the API
+
+            if (response.status === 200 || response.status === 201) {
+                alert(editingVisitor ? "Visitor updated successfully!" : "Visitor added successfully!");
+                setShowModal(false);
+            }
         } catch (error) {
-            console.error("Error saving visitor:", error);
+            if (error.response) {
+                console.error("Validation Errors:", error.response.data); // Log validation errors
+                alert("Failed to save visitor. Please check your inputs: " + JSON.stringify(error.response.data));
+            } else {
+                console.error("Error:", error); // Log other errors
+                alert("Failed to save visitor. Please check your inputs.");
+            }
         }
     };
 
@@ -82,6 +121,7 @@ const Visitors = () => {
                 fetchVisitors();
             } catch (error) {
                 console.error("Error deleting visitor:", error);
+                alert("Failed to delete visitor. Please try again.");
             }
         }
     };
@@ -90,7 +130,17 @@ const Visitors = () => {
     const handleCloseModal = () => {
         setShowModal(false);
         setEditingVisitor(null);
-        setNewVisitor({ firstname: "", lastname: "", phone: "", email: "", address: "", dob: "", gender: "M", want_to_be_member: false, would_like_visit: false });
+        setNewVisitor({
+            firstname: "",
+            lastname: "",
+            phone: "",
+            email: "",
+            address: "",
+            dob: "",
+            gender: "M",
+            want_to_be_member: false,
+            would_like_visit: false,
+        });
     };
 
     // Filter visitors based on search term
@@ -184,7 +234,7 @@ const Visitors = () => {
                                                     <td>{visitor.phone}</td>
                                                     <td>{visitor.email}</td>
                                                     <td>{visitor.address}</td>
-                                                    <td>{visitor.gender === "M" ? "Male" : "Female"}</td>
+                                                    <td>{visitor.gender === "male" ? "Male" : "Female"}</td>
                                                     <td>
                                                         <button
                                                             className="btn btn-sm btn-warning me-2"

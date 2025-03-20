@@ -21,14 +21,14 @@ const Login = () => {
         { email, password },
         { headers: { "Content-Type": "application/json" } }
       );
-      
+
       console.log("Response Data:", response.data);
 
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
         console.log("Login successful! Redirecting...");
-        navigate("/dashboard");
+        navigate("/admin/dashboard"); // Updated path
       } else {
         setError("Login failed. No token received.");
       }

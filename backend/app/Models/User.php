@@ -2,43 +2,56 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, Notifiable;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role_id', // Use role_id instead of role string
-        'team',
+        'name', 'email', 'password',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    protected function casts(): array
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
+     * Define the many-to-many relationship with Role.
+     */
+    public function roles()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'role_id' => 'integer',
-            'team' => 'string',
-        ];
+        return $this->belongsToMany(Role::class);
     }
 
     /**
-     * Relationship: A user belongs to a role.
+     * Check if the user has a specific role (case-insensitive).
      */
-    public function role()
+    public function hasRole($role)
     {
-        return $this->belongsTo(Role::class);
+        return $this->roles->contains(function ($r) use ($role) {
+            return strtolower($r->name) === strtolower($role);
+        });
     }
 }

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Sidebar from "../components/Sidebar";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import ImportExport from "../components/Attendance/ImportExport";
-import Modal from "../components/Attendance/Modal";
-import Table from "../components/Attendance/Table";
-import Analytics from "../components/Attendance/Analytics";
+import Sidebar from "../../components/Sidebar"; // Updated path
+import Navbar from "../../components/Navbar"; // Updated path
+import Footer from "../../components/Footer"; // Updated path
+import ImportExport from "../../components/Attendance/ImportExport"; // Updated path
+import Modal from "../../components/Attendance/Modal"; // Updated path
+import Table from "../../components/Attendance/Table"; // Updated path
+import Analytics from "../../components/Attendance/Analytics"; // Updated path
 
 const Attendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -218,6 +218,7 @@ const Attendance = () => {
                                 pageCount={pageCount}
                                 handlePageChange={handlePageChange}
                             />
+
                             {/* Attendance Analytics */}
                             <Analytics attendanceRecords={attendanceRecords} />
                         </div>

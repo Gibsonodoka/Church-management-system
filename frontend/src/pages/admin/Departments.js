@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar"; // Import Sidebar
-import Navbar from "../components/Navbar"; // Import Navbar
-import Footer from "../components/Footer"; // Import Footer
+import Sidebar from "../../components/Sidebar"; // Updated path
+import Navbar from "../../components/Navbar"; // Updated path
+import Footer from "../../components/Footer"; // Updated path
 import axios from "axios"; // Import axios
 import { 
   getDepartments, 
   createDepartment, 
   deleteDepartment, 
   updateDepartment 
-} from "../components/Departments/api/departmentApi";
+} from "../../components/Departments/api/departmentApi"; // Updated path
 
 const Departments = () => {
   const navigate = useNavigate();

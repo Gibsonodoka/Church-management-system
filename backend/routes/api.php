@@ -28,6 +28,9 @@ Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
 
 // Attendance
 Route::apiResource('attendance', AttendanceController::class);
+// Attendance analytics routes
+Route::get('/attendances/member-growth', [AttendanceController::class, 'getMemberGrowth']);
+Route::get('/attendances/demographics', [AttendanceController::class, 'getDemographics']);
 
 // Visitors
 Route::get('/visitors/recent', [VisitorController::class, 'recent']);

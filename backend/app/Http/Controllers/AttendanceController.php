@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceController extends Controller
 {
@@ -91,4 +92,37 @@ class AttendanceController extends Controller
         $attendance->delete();
         return response()->json(['message' => 'Record deleted successfully']);
     }
+
+    /**
+ * Fetch member growth data (new members added per month).
+ */
+public function getMemberGrowth()
+{
+    $memberGrowth = DB::table('attendances')
+        ->selectRaw('DATE_FORMAT(date, "%Y-%m") as month, SUM(men + women + youth + teens + children) as total_attendance')
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+
+    return response()->json($memberGrowth);
+}
+
+/**
+ * Fetch demographics data (men, women, youths, teens, children per month).
+ */
+public function getDemographics()
+{
+    $demographics = DB::table('attendances')
+        ->selectRaw('DATE_FORMAT(date, "%Y-%m") as month, 
+                     SUM(men) as men, 
+                     SUM(women) as women, 
+                     SUM(youth) as youths, 
+                     SUM(teens) as teens, 
+                     SUM(children) as children')
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+
+    return response()->json($demographics);
+}
 }

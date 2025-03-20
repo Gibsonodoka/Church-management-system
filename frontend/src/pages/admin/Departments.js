@@ -110,7 +110,6 @@ const Departments = () => {
           <main>
             <div className="container-fluid px-4">
               <h1 className="mt-4 text-3xl font-bold text-gray-800">Departments</h1>
-              <p className="text-gray-600 mb-6">Welcome {user ? user.name : "Loading..."} to Our Church Management System</p>
 
               {/* Add Department Form */}
               <div className="mb-4 p-4 bg-white rounded shadow-sm">

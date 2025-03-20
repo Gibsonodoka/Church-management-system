@@ -1,4 +1,4 @@
 
 ## Church Management System
-### Created by Gibson
+### Created by Gibson Uwhetu - SpaceHaux 
 

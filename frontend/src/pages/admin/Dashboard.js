@@ -5,12 +5,14 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import ChartComponent from "../../components/ChartComponent";
 import VisitorsTable from "../../components/VisitorsTable";
+import Spinner from "../../components/Spinner";
 import axios from "axios";
 import CountUp from "react-countup";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); 
   const [stats, setStats] = useState({
     members: 0,
     visitors: 0, // This will hold the total number of visitors
@@ -22,6 +24,7 @@ const Dashboard = () => {
     attendance: 0,
   });
   const [recentVisitors, setRecentVisitors] = useState([]); // State for recent visitors
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -36,6 +39,7 @@ const Dashboard = () => {
         })
         .then((response) => {
           setUser(response.data);
+          setLoading(false);
         })
         .catch(() => {
           localStorage.removeItem("token");
@@ -82,7 +86,11 @@ const Dashboard = () => {
         });
     }
   }, [navigate]);
-
+  if (loading) {
+    return <Spinner />;
+  }
+  
+ 
   return (
     <div className="sb-nav-fixed">
       <Navbar />
@@ -96,7 +104,7 @@ const Dashboard = () => {
           <main>
             <div className="container-fluid px-4">
               <h1 className="mt-4">Dashboard</h1>
-              <p>Welcome {user ? user.name : "Loading..."} to Our Church Management System</p>
+              <p>Welcome {user ? user.name : "Loading..."} </p>
 
               <div className="row">
                 {[

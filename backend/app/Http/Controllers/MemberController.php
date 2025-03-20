@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\DB;
 use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Validation\Rule;
 use Exception;
+use Carbon\Carbon; // Import Carbon
 
 class MemberController extends Controller
 {
@@ -15,18 +17,31 @@ class MemberController extends Controller
     {
         return response()->json(Member::all(), 200);
     }
-// Import function
+
+    // Import function
     public function importMembers(Request $request) {
-        foreach ($request->all() as $memberData) {
-            Member::create([
-                'name' => $memberData['name'],
-                'email' => $memberData['email'],
-                'phone' => $memberData['phone'],
+        try {
+            $request->validate([
+                '*.name' => 'required|string|max:255',
+                '*.email' => 'required|email|unique:members,email',
+                '*.phone' => 'required|string|max:15',
             ]);
+
+            foreach ($request->all() as $memberData) {
+                Member::create([
+                    'name' => $memberData['name'],
+                    'email' => $memberData['email'],
+                    'phone' => $memberData['phone'],
+                ]);
+            }
+
+            return response()->json(['message' => 'Import successful'], 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
         }
-    
-        return response()->json(['message' => 'Import successful'], 200);
     }
+
     // Store a new member
     public function store(Request $request)
     {
@@ -130,4 +145,24 @@ class MemberController extends Controller
             return response()->json(['error' => 'Member not found'], 404);
         }
     }
+
+    public function getBirthdays()
+{
+    $birthdays = DB::table('members')
+        ->select('id', 'first_name', 'last_name', 'dob')
+        ->whereNotNull('dob') // Only fetch members with a date of birth
+        ->get()
+        ->map(function ($member) {
+            // Extract day and month from the dob
+            $dob = Carbon::parse($member->dob);
+            return [
+                'id' => $member->id,
+                'name' => $member->first_name . ' ' . $member->last_name, // Concatenate first and last name
+                'day' => $dob->day,
+                'month' => $dob->month,
+            ];
+        });
+
+    return response()->json($birthdays);
+}
 }

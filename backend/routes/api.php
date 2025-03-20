@@ -46,6 +46,8 @@ Route::post('/members', [MemberController::class, 'store']);
 Route::put('/members/{id}', [MemberController::class, 'update']); // Add this line
 Route::delete('/members/{id}', [MemberController::class, 'destroy']); // Add this line
 
+Route::get('/members/birthdays', [MemberController::class, 'getBirthdays']);
+
 // Protected routes (Require authentication via Sanctum)
 Route::middleware('auth:sanctum')->group(function () {
     // Get authenticated user details

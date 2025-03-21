@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ChurchEventController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +28,9 @@ Route::post('/departments', [DepartmentController::class, 'store']);
 Route::put('/departments/{id}', [DepartmentController::class, 'update']);
 Route::delete('/departments/{id}', [DepartmentController::class, 'destroy']);
 
+//Events
+Route::apiResource('events', EventController::class)->middleware('auth:sanctum');
+Route::apiResource('church-events', ChurchEventController::class)->middleware('auth:sanctum');
 // Attendance
 Route::apiResource('attendance', AttendanceController::class);
 // Attendance analytics routes

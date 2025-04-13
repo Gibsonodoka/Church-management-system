@@ -70,29 +70,7 @@ const userRole = "admin"; // This would come from your authentication system
 
 
 
-Optional: Role-Based Redirection
-If you plan to implement role-based redirection (e.g., redirect users to different dashboards based on their role), you can modify the handleLogin function like this:
 
-javascript
-Copy
-if (response.data.token) {
-  localStorage.setItem("token", response.data.token);
-  localStorage.setItem("user", JSON.stringify(response.data.user));
-  console.log("Login successful! Redirecting...");
-
-  // Role-based redirection
-  const userRole = response.data.user.role; // Assuming the role is returned in the response
-  if (userRole === "admin") {
-    navigate("/admin/dashboard");
-  } else if (userRole === "pastor") {
-    navigate("/pastor/dashboard");
-  } else if (userRole === "member") {
-    navigate("/member/dashboard");
-  } else {
-    navigate("/login"); // Fallback for unknown roles
-  }
-}
-Let me know if you need further assistance! 😊
 
 
 
